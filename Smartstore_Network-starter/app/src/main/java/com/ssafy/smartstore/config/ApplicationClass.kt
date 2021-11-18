@@ -38,7 +38,8 @@ class ApplicationClass : Application() {
         var latestMode = 0
 
         var liveCnt = MutableLiveData<Int>()
-
+        var flag=false
+        var tableN = ""
 
 
         // 모든 퍼미션 관련 배열

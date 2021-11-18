@@ -74,7 +74,6 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
 
 
 
-
     // 모든 퍼미션 관련 배열
     private val requiredPermissions = arrayOf(
         Manifest.permission.ACCESS_FINE_LOCATION,
