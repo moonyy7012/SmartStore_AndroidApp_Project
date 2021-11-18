@@ -1,6 +1,7 @@
 package com.ssafy.smartstore.activity
 
 import android.Manifest
+import android.app.AlertDialog
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -19,17 +20,22 @@ import android.os.Bundle
 import android.os.RemoteException
 import android.util.Log
 import android.view.View
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.LiveData
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.messaging.FirebaseMessaging
 import com.ssafy.smartstore.*
 import com.ssafy.smartstore.R
+import com.ssafy.smartstore.adapter.OrderDetailListAdapter
 import com.ssafy.smartstore.config.ApplicationClass
 import com.ssafy.smartstore.config.ApplicationClass.Companion.flag
 import com.ssafy.smartstore.config.ApplicationClass.Companion.notiIdx
@@ -41,25 +47,29 @@ import com.ssafy.smartstore.dto.Notification
 import com.ssafy.smartstore.dto.Order
 import com.ssafy.smartstore.dto.OrderDetail
 import com.ssafy.smartstore.fragment.*
+import com.ssafy.smartstore.response.OrderDetailResponse
 import com.ssafy.smartstore.service.OrderService
 import com.ssafy.smartstore.util.RetrofitCallback
 import org.altbeacon.beacon.*
-import java.util.ArrayList
+import java.util.*
 
 private const val TAG = "MainActivity_싸피"
 class MainActivity : AppCompatActivity(), BeaconConsumer {
     private lateinit var bottomNavigation : BottomNavigationView
+    var orderId = -1
+
     // beacon
-
-    private var isStoreIn = true
-
     private lateinit var beaconManager: BeaconManager
     private val BEACON_UUID = "fda50693-a4e2-4fb1-afcf-c6eb07647825"
     private val BEACON_MAJOR = "10004"
     private val BEACON_MINOR = "54480"
     private val STORE_DISTANCE = 1 // 스토어 거리 1m
 
-    private val region = Region("altbeacon",null,null,null)
+    private val region = Region("altbeacon"
+        , Identifier.parse(BEACON_UUID)
+        , Identifier.parse(BEACON_MAJOR)
+        , Identifier.parse(BEACON_MINOR)
+    )
 
     private lateinit var bluetoothManager: BluetoothManager
     private var bluetoothAdapter: BluetoothAdapter? = null
@@ -67,29 +77,17 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
 
     private val PERMISSIONS_CODE = 100
 
-    var nfcAdapter: NfcAdapter?=null
-    var pIntent:PendingIntent?=null
+    // nfc
+    var nfcAdapter: NfcAdapter? = null
+    var pIntent:PendingIntent? = null
     lateinit var filters: Array<IntentFilter>
     lateinit var i:Intent
 
-
-
-    // 모든 퍼미션 관련 배열
-    private val requiredPermissions = arrayOf(
-        Manifest.permission.ACCESS_FINE_LOCATION,
-    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         // 가장 첫 화면은 홈 화면의 Fragment로 지정
-        nfcAdapter = NfcAdapter.getDefaultAdapter(this)
-        i = Intent(this, MainActivity::class.java)
-        i.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
-        pIntent = PendingIntent.getActivity(this, 0, i, 0)
-        val tag_filter = IntentFilter(NfcAdapter.ACTION_TAG_DISCOVERED)
-
-        filters = arrayOf(tag_filter)
 
         setNdef()
 
@@ -134,25 +132,6 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
                 bottomNavigation.selectedItemId = item.itemId
             }
         }
-
-
-        // beacon
-        if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-            != PackageManager.PERMISSION_GRANTED){
-            ActivityCompat.requestPermissions(
-                this,
-                requiredPermissions,
-                PERMISSIONS_CODE
-            )
-        }
-
-        beaconManager = BeaconManager.getInstanceForApplication(this)
-        beaconManager.beaconParsers.add(BeaconParser().setBeaconLayout("m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24"))
-        bluetoothManager = getSystemService(BLUETOOTH_SERVICE) as BluetoothManager
-        bluetoothAdapter = bluetoothManager.adapter
-
-        startScan()
-
     }
 
     fun openFragment(index:Int, key:String, value:Int){
@@ -212,9 +191,30 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
         else bottomNavigation.visibility = View.VISIBLE
     }
 
-    private fun setNdef(){}
+    private fun setNdef(){
+        nfcAdapter = NfcAdapter.getDefaultAdapter(this)
 
-    private fun setBeacon(){}
+        if (nfcAdapter == null) {
+            finish()
+        }
+        i = Intent(this, MainActivity::class.java)
+        i.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+        pIntent = PendingIntent.getActivity(this, 0, i, 0)
+
+        val tag_filter = IntentFilter(NfcAdapter.ACTION_TAG_DISCOVERED)
+        filters = arrayOf(tag_filter)
+    }
+
+    private fun setBeacon(){
+        checkPermissions()
+
+        beaconManager = BeaconManager.getInstanceForApplication(this)
+        beaconManager.beaconParsers.add(BeaconParser().setBeaconLayout("m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24"))
+        bluetoothManager = getSystemService(BLUETOOTH_SERVICE) as BluetoothManager
+        bluetoothAdapter = bluetoothManager.adapter
+
+        startScan()
+    }
 
     // NotificationChannel 설정
     private fun createNotificationChannel(id: String, name: String) {
@@ -229,7 +229,14 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
     }
 
     private fun checkPermissions(){
-
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+            != PackageManager.PERMISSION_GRANTED){
+            ActivityCompat.requestPermissions(
+                this,
+                ApplicationClass.requiredPermissions,
+                PERMISSIONS_CODE
+            )
+        }
     }
 
     // Beacon Scan 시작
@@ -242,14 +249,7 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
         }
 
         // 위치 정보 권한 허용 및 GPS Enable 여부 확인
-        if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-            != PackageManager.PERMISSION_GRANTED){
-            ActivityCompat.requestPermissions(
-                this,
-                requiredPermissions,
-                PERMISSIONS_CODE
-            )
-        }
+        checkPermissions()
         Log.d(TAG, "startScan: beacon Scan start")
 
         // Beacon Service bind
@@ -327,30 +327,15 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
 
         beaconManager.addRangeNotifier { beacons, region ->
             for (beacon in beacons) {
-                // Major, Minor로 Beacon 구별, 1미터 이내에 들어오면 메세지 출력
-
-                if(isYourBeacon(beacon) && isStoreIn){
-                    // 한번만 띄우기 위한 조건
-
-                    runOnUiThread {
-                        Toast.makeText(this@MainActivity, "매장 안에 들어오셨습니다.", Toast.LENGTH_SHORT).show()
+                // Major, Minor로 Beacon 구별, 1미터 이내에 들어오면 다이얼로그 출력
+                if(isStoreBeacon(beacon)){
+                    if (beacon.distance <= STORE_DISTANCE) {
+                        // 주문한건지 확인
+                        showPopDialog()
+                        beaconManager.stopMonitoringBeaconsInRegion(region)
+                        beaconManager.stopRangingBeaconsInRegion(region)
                     }
-                    Log.d(TAG, "distance: " + beacon.distance + " Major : " + beacon.id2 + ", Minor" + beacon.id3)
-
-                    beaconManager.stopMonitoringBeaconsInRegion(region)
-                    beaconManager.stopRangingBeaconsInRegion(region)
-                    beaconManager.unbind(this)
-                    isStoreIn = false
-
-                    storeInUser = true
-
-                    notiList.add(Notification(notiIdx++,"${ApplicationClass.sharedPreferencesUtil.getUser().name}님은 매장 안에 있습니다."))
-                    Log.d(TAG, "onBeaconServiceConnect: 비콘종료")
                 }
-            }
-
-            if(beacons.isEmpty()){
-
             }
         }
 
@@ -362,47 +347,75 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
     }
 
     // 찾고자 하는 Beacon이 맞는지, 정해둔 거리 내부인지 확인
-    private fun isYourBeacon(beacon: Beacon): Boolean {
-//        return (beacon.id2.toString() == BEACON_MAJOR &&
-//                beacon.id3.toString() == BEACON_MINOR &&
-//                beacon.distance <= STORE_DISTANCE
-//                )
-        if (beacon.distance <= STORE_DISTANCE) {
-            return (beacon.distance <= STORE_DISTANCE)
+    private fun isStoreBeacon(beacon: Beacon): Boolean {
+        return beacon.id2.toString() == BEACON_MAJOR && beacon.id3.toString() == BEACON_MINOR && beacon.distance <= STORE_DISTANCE
+
+    }
+
+    private fun showPopDialog() {
+        val view = layoutInflater.inflate(R.layout.dialog_popup, null)
+
+        if (orderId > 0) {
+            val orderList = OrderService().getOrderDetails(orderId)
+
+            runOnUiThread {
+                orderList.observe(this, { orderDetails ->
+                    val orderListAdapter = OrderDetailListAdapter(this, orderDetails)
+                    view.apply {
+                        findViewById<TextView>(R.id.tvVoid).visibility = View.GONE
+                        findViewById<RecyclerView>(R.id.dialogRecycler).apply {
+                            val linearLayoutManager = LinearLayoutManager(context)
+                            linearLayoutManager.orientation = LinearLayoutManager.VERTICAL
+                            layoutManager = linearLayoutManager
+                            adapter = orderListAdapter
+                        }
+                    }
+                    AlertDialog.Builder(this).apply {
+                        setView(view)
+                        setPositiveButton("확인", null)
+                        show()
+                    }
+                    Log.d(TAG, "showDialog: success")
+                })
+            }
         } else {
-            return (beacon.distance <= STORE_DISTANCE)
+            view.apply {
+                findViewById<TextView>(R.id.tvVoid).visibility = View.VISIBLE
+                findViewById<RecyclerView>(R.id.dialogRecycler).visibility = View.GONE
+            }
+            AlertDialog.Builder(this).apply {
+                setView(view)
+                setPositiveButton("확인", null)
+                show()
+            }
+            Log.d(TAG, "showDialog: success")
         }
 
     }
+
     //Tag 데이터를 추출하는 함수
     fun getNFCData(intent: Intent){
-        //Tag가 태깅되었을 때 데이터 추출
-        if(intent.action.equals(NfcAdapter.ACTION_TAG_DISCOVERED)){
-            Log.e(TAG, "getNFCData: ", )
-            val rawMsgs = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES)
-            if(rawMsgs!=null){
-                val message = arrayOfNulls<NdefMessage>(rawMsgs.size)
-                for(i in rawMsgs.indices){
-                    message[i]=rawMsgs[i] as NdefMessage
-                }
-                //실제 저장되어 있는 데이터를 추출
-                val record_data = message[0]!!.records[0]
-                val record_type = record_data.type
-                val type = String(record_type)
-                if(type.equals("T")){
-                    val data = record_data.payload
-                    //가져온 데이터를 TextView에 반영
+        val rawMsgs = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES)
 
-                    tableN = String(data).substring(3)
-                    flag=true
-                    completedOrder()
-                    Log.d("tableN", "getNFCData: ${tableN}")
-
-
-                }
-
-
+        if(rawMsgs!=null){
+            val message = arrayOfNulls<NdefMessage>(rawMsgs.size)
+            for(i in rawMsgs.indices){
+                message[i]=rawMsgs[i] as NdefMessage
             }
+            //실제 저장되어 있는 데이터를 추출
+            val record_data = message[0]!!.records[0]
+            val record_type = record_data.type
+            val type = String(record_type)
+            if(type.equals("T")){
+                val data = record_data.payload
+                //가져온 데이터를 TextView에 반영
+                tableN = String(data).substring(3)
+                flag=true
+                completedOrder()
+                Log.d("tableN", "getNFCData: $tableN")
+            }
+
+
         }
     }
     private fun completedOrder(){
@@ -412,8 +425,8 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
         var totalprice = 0
         var topImg =""
         var topProductName = ""
-        for(item in ApplicationClass.shoppingList){
-            if(quantity==0){
+        for(item in shoppingList){
+            if(quantity == 0){
                 topImg = item.menuImg
                 topProductName = item.menuName
             }
@@ -445,9 +458,6 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
         }
 
         override fun onSuccess(code: Int, responseData: Int) {
-//            supportFragmentManager.beginTransaction()
-//                .replace(R.id.frame_layout_main, MypageFragment())
-//                .commit()
             this@MainActivity.openFragment(6)
         }
     }
@@ -463,21 +473,20 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
         super.onResume()
         flag=false
         nfcAdapter!!.enableForegroundDispatch(this, pIntent, filters, null)
-
     }
+
     override fun onPause() {
         super.onPause()
         nfcAdapter!!.disableForegroundDispatch(this)
     }
+
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
         Log.e("INFO", "onNewIntent called...")
         Log.e(TAG, "${intent!!.action}", )
 
-        if(intent!!.action.equals(NfcAdapter.ACTION_TAG_DISCOVERED)){
-//            val detectTag = intent.getParcelableExtra<Tag>(NfcAdapter.EXTRA_TAG)
+        if(intent.action.equals(NfcAdapter.ACTION_TAG_DISCOVERED)){
             getNFCData(intent)
         }
     }
-
 }
