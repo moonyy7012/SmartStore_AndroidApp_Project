@@ -43,7 +43,7 @@ class UserService {
         })
     }
 
-    fun insert(user:User, callback: RetrofitCallback<Boolean>)  {
+    fun join(user:User, callback: RetrofitCallback<Boolean>)  {
         RetrofitUtil.userService.insert(user).enqueue(object : Callback<Boolean> {
             override fun onResponse(call: Call<Boolean>, response: Response<Boolean>) {
                 val res = response.body()
