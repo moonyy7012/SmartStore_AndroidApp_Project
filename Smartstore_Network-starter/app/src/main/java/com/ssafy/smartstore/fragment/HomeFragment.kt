@@ -45,8 +45,6 @@ private const val TAG = " HomeFrag_싸피"
 // Home 탭
 class HomeFragment : Fragment() {
     // 최근주문 데이터가 있는 userData
-    private var userData: HashMap<String,Any> = HashMap<String,Any>()
-
     private lateinit var latestOrderAdapter : LatestOrderAdapter
     private lateinit var noticeAdapter: NoticeAdapter
     private lateinit var mainActivity: MainActivity
@@ -105,32 +103,28 @@ class HomeFragment : Fragment() {
         }
 
         val userLastOrderLiveData = OrderService().getLastMonthOrder(ApplicationClass.sharedPreferencesUtil.getUser().id)
-        userLastOrderLiveData.observe(
-            viewLifecycleOwner,
-            {
-                latestList = it
+        userLastOrderLiveData.observe(viewLifecycleOwner, {
+            latestList = it
 
-                latestOrderAdapter = LatestOrderAdapter(mainActivity, latestList)
-                latestOrderAdapter.setItemClickListener(object : LatestOrderAdapter.ItemClickListener {
-                    override fun onClick(view: View, position: Int, orderId: Int) {
-                        Log.d(TAG, "onClick: $orderId")
-                        ApplicationClass.latestMode = 1
-                        var data = OrderService().getOrderDetails(orderId)
-                        Thread.sleep(200L)
+            latestOrderAdapter = LatestOrderAdapter(mainActivity, latestList)
+            latestOrderAdapter.setItemClickListener(object : LatestOrderAdapter.ItemClickListener {
+                override fun onClick(view: View, position: Int, orderId: Int) {
+                    Log.d(TAG, "onClick: $orderId")
+                    ApplicationClass.latestMode = 1
+                    Thread.sleep(200L)
 
-                        mainActivity.openFragment(1,"orderId",orderId)
+                    mainActivity.openFragment(1,"orderId",orderId)
 
-                    }
-                })
-                binding.recyclerViewLatestOrder.apply {
-                    layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
-                    adapter = latestOrderAdapter
-                    //원래의 목록위치로 돌아오게함
-                    adapter!!.stateRestorationPolicy =
-                        RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
                 }
+            })
+            binding.recyclerViewLatestOrder.apply {
+                layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+                adapter = latestOrderAdapter
+                //원래의 목록위치로 돌아오게함
+                adapter!!.stateRestorationPolicy =
+                    RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
             }
-        )
+        })
 
     }
 

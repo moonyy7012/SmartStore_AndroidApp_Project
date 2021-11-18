@@ -31,14 +31,11 @@ class ApplicationClass : Application() {
 
         var shoppingList = mutableListOf<ShoppingCart>()
 
-        // 매장 안에 있습니까?
-        var storeInUser = false
-
         // 최근주문 모드
         var latestMode = 0
 
         var liveCnt = MutableLiveData<Int>()
-        var flag=false
+        var flag = false
         var tableN = ""
 
 

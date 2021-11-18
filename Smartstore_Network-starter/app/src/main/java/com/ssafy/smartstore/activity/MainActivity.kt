@@ -13,7 +13,6 @@ import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.nfc.NdefMessage
 import android.nfc.NfcAdapter
-import android.nfc.Tag
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -26,28 +25,19 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.Fragment
-import androidx.lifecycle.LiveData
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.firebase.messaging.FirebaseMessaging
 import com.ssafy.smartstore.*
 import com.ssafy.smartstore.R
 import com.ssafy.smartstore.adapter.OrderDetailListAdapter
 import com.ssafy.smartstore.config.ApplicationClass
 import com.ssafy.smartstore.config.ApplicationClass.Companion.flag
-import com.ssafy.smartstore.config.ApplicationClass.Companion.notiIdx
-import com.ssafy.smartstore.config.ApplicationClass.Companion.notiList
 import com.ssafy.smartstore.config.ApplicationClass.Companion.shoppingList
-import com.ssafy.smartstore.config.ApplicationClass.Companion.storeInUser
 import com.ssafy.smartstore.config.ApplicationClass.Companion.tableN
-import com.ssafy.smartstore.dto.Notification
 import com.ssafy.smartstore.dto.Order
 import com.ssafy.smartstore.dto.OrderDetail
 import com.ssafy.smartstore.fragment.*
-import com.ssafy.smartstore.response.OrderDetailResponse
 import com.ssafy.smartstore.service.OrderService
 import com.ssafy.smartstore.util.RetrofitCallback
 import org.altbeacon.beacon.*
@@ -414,8 +404,6 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
                 completedOrder()
                 Log.d("tableN", "getNFCData: $tableN")
             }
-
-
         }
     }
     private fun completedOrder(){
@@ -449,6 +437,7 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
         shoppingList.clear()
         flag=false
     }
+
     inner class OrderCallback: RetrofitCallback<Int> {
 
         override fun onError(t: Throwable) {
@@ -461,6 +450,7 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
             this@MainActivity.openFragment(6)
         }
     }
+
     override fun onDestroy() {
         beaconManager.stopMonitoringBeaconsInRegion(region)
         beaconManager.stopRangingBeaconsInRegion(region)
