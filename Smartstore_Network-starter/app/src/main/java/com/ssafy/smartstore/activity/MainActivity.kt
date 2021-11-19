@@ -33,7 +33,7 @@ import com.ssafy.smartstore.*
 import com.ssafy.smartstore.R
 import com.ssafy.smartstore.adapter.OrderDetailListAdapter
 import com.ssafy.smartstore.config.ApplicationClass
-import com.ssafy.smartstore.config.ApplicationClass.Companion.flag
+import com.ssafy.smartstore.config.ApplicationClass.Companion.isNear
 import com.ssafy.smartstore.config.ApplicationClass.Companion.shoppingList
 import com.ssafy.smartstore.config.ApplicationClass.Companion.tableN
 import com.ssafy.smartstore.config.ShoppingListViewModel
@@ -387,6 +387,7 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
             }
             Log.d(TAG, "showDialog: success")
         }
+        isNear=true
 
     }
 
@@ -407,7 +408,6 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
                 val data = record_data.payload
                 //가져온 데이터를 TextView에 반영
                 tableN = String(data).substring(3)
-                flag=true
                 completedOrder()
                 Log.d("tableN", "getNFCData: $tableN")
             }
@@ -441,8 +441,8 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
         OrderService().insert(order, this.OrderCallback())
 
         Toast.makeText(this,"주문이 완료되었습니다.",Toast.LENGTH_SHORT).show()
-
         flag=false
+        shoppingList.clear()
     }
 
     inner class OrderCallback: RetrofitCallback<Int> {
@@ -468,7 +468,6 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
 
     override fun onResume() {
         super.onResume()
-        flag=false
         nfcAdapter!!.enableForegroundDispatch(this, pIntent, filters, null)
     }
 
@@ -477,12 +476,13 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
         nfcAdapter!!.disableForegroundDispatch(this)
     }
 
+    var flag = false
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
         Log.e("INFO", "onNewIntent called...")
         Log.e(TAG, "${intent!!.action}", )
 
-        if(intent.action.equals(NfcAdapter.ACTION_TAG_DISCOVERED)){
+        if(flag==true&&intent.action.equals(NfcAdapter.ACTION_TAG_DISCOVERED)){
             getNFCData(intent)
         }
     }
