@@ -57,24 +57,6 @@ class ShoppingListFragment : Fragment(){
         btnOrder = binding.btnOrder
         btnTakeout = binding.btnTakeout
 
-        arguments?.let {
-            val orderId = it.getInt("orderId")
-            OrderService().getOrderDetails(orderId).observe(viewLifecycleOwner, { list ->
-                for (item in list) {
-                    val shoppingCart = ShoppingCart(
-                        item.productId,
-                        item.img,
-                        item.productName,
-                        item.quantity,
-                        item.unitPrice,
-                        item.totalPrice,
-//                        item.productType
-                    )
-                    mainActivity.shppingListViewModel.addItem(shoppingCart)
-                }
-            })
-        }
-
         shoppingListAdapter = ShoppingListAdapter(mainActivity)
         binding.recyclerViewShoppingList.apply {
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)

@@ -90,7 +90,21 @@ class HomeFragment : Fragment() {
             latestOrderAdapter.setItemClickListener(object : LatestOrderAdapter.ItemClickListener {
                 override fun onClick(view: View, position: Int, orderId: Int) {
                     Log.d(TAG, "onClick: $orderId")
-                    mainActivity.openFragment(1,"orderId",orderId)
+                    OrderService().getOrderDetails(orderId).observe(viewLifecycleOwner, { list ->
+                        for (item in list) {
+                            val shoppingCart = ShoppingCart(
+                                item.productId,
+                                item.img,
+                                item.productName,
+                                item.quantity,
+                                item.unitPrice,
+                                item.totalPrice,
+//                        item.productType
+                            )
+                            mainActivity.shppingListViewModel.addItem(shoppingCart)
+                        }
+                        mainActivity.openFragment(1)
+                    })
                 }
             })
             binding.recyclerViewLatestOrder.apply {
