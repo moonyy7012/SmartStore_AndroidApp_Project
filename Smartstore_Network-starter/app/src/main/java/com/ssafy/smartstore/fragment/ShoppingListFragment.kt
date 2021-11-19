@@ -4,12 +4,10 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.DialogInterface
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -17,45 +15,30 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ssafy.smartstore.R
 import com.ssafy.smartstore.activity.MainActivity
-
 import com.ssafy.smartstore.adapter.ShoppingListAdapter
-import com.ssafy.smartstore.config.ApplicationClass
-import com.ssafy.smartstore.config.ApplicationClass.Companion.isNear
-import com.ssafy.smartstore.config.ApplicationClass.Companion.shoppingList
-import com.ssafy.smartstore.config.ApplicationClass.Companion.tableN
 import com.ssafy.smartstore.databinding.FragmentShoppingListBinding
-import com.ssafy.smartstore.dto.Order
-import com.ssafy.smartstore.dto.OrderDetail
+import com.ssafy.smartstore.dto.ShoppingCart
 import com.ssafy.smartstore.service.OrderService
-import com.ssafy.smartstore.util.RetrofitCallback
-import java.util.ArrayList
+import com.ssafy.smartstore.util.CommonUtils
 
 //장바구니 Fragment
 class ShoppingListFragment : Fragment(){
-    private lateinit var shoppingListRecyclerView: RecyclerView
-    private var shoppingListAdapter : ShoppingListAdapter? = ShoppingListAdapter()
+    private lateinit var shoppingListAdapter : ShoppingListAdapter
     private lateinit var mainActivity: MainActivity
     private lateinit var btnShop : Button
     private lateinit var btnTakeout : Button
     private lateinit var btnOrder : Button
     private var isShop : Boolean = true
-    private var totalprice = 0
-    private var totalcnt = 0
-    private var orderId = -1
     private lateinit var binding: FragmentShoppingListBinding
-    private lateinit var ad:AlertDialog
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
         mainActivity = context as MainActivity
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mainActivity.hideBottomNav(true)
-        arguments?.let {
-            orderId = it.getInt("orderId") ?: -1
-        }
-
     }
 
     override fun onCreateView(
@@ -69,29 +52,48 @@ class ShoppingListFragment : Fragment(){
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         btnShop = binding.btnShop
         btnOrder = binding.btnOrder
         btnTakeout = binding.btnTakeout
-        shoppingListRecyclerView = binding.recyclerViewShoppingList
-        shoppingListAdapter = ShoppingListAdapter()
-        shoppingListRecyclerView.apply {
-            val linearLayoutManager = LinearLayoutManager(context)
-            linearLayoutManager.orientation = LinearLayoutManager.VERTICAL
-            layoutManager = linearLayoutManager
+
+        arguments?.let {
+            val orderId = it.getInt("orderId")
+            OrderService().getOrderDetails(orderId).observe(viewLifecycleOwner, { list ->
+                for (item in list) {
+                    val shoppingCart = ShoppingCart(
+                        item.productId,
+                        item.img,
+                        item.productName,
+                        item.quantity,
+                        item.unitPrice,
+                        item.totalPrice,
+//                        item.productType
+                    )
+                    mainActivity.shppingListViewModel.addItem(shoppingCart)
+                }
+            })
+        }
+
+        shoppingListAdapter = ShoppingListAdapter(mainActivity)
+        binding.recyclerViewShoppingList.apply {
+            layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
             adapter = shoppingListAdapter
             //원래의 목록위치로 돌아오게함
             adapter!!.stateRestorationPolicy =
                 RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
         }
-        totalcnt=0
-        totalprice=0
-        for(item in shoppingList){
-            totalprice+=item.totalPrice
-            totalcnt+=item.menuCnt
-        }
-        view.findViewById<TextView>(R.id.textShoppingCount).text="총 ${totalcnt}개"
-        view.findViewById<TextView>(R.id.textShoppingMoney).text="${totalprice} 원"
 
+        initTotal()
+        initListener()
+    }
+
+    private fun initTotal() {
+        binding.textShoppingCount.text = "총 ${shoppingListAdapter.getTotalCount()}개"
+        binding.textShoppingMoney.text = CommonUtils.makeComma(shoppingListAdapter.getTotalPrice())
+    }
+
+    private fun initListener() {
         btnShop.setOnClickListener {
             btnShop.background = ContextCompat.getDrawable(requireContext(), R.drawable.button_color)
             btnTakeout.background = ContextCompat.getDrawable(requireContext(), R.drawable.button_non_color)
@@ -103,72 +105,49 @@ class ShoppingListFragment : Fragment(){
             isShop = false
         }
         btnOrder.setOnClickListener {
-            if(shoppingList.isEmpty()){
-                Toast.makeText(context,"주문할 상품이 없습니다.",Toast.LENGTH_SHORT).show()
-            }else{
-                if(isShop) showDialogForOrderInShop()
-                else {
-                    //거리가 200이상이라면
-                    if(!isNear) showDialogForOrderTakeoutOver200m()
-                    else completedOrder()
-
+            mainActivity.shppingListViewModel.shoppingList.observe(viewLifecycleOwner, { list ->
+                if (list.isEmpty()) {
+                    Toast.makeText(context,"주문할 상품이 없습니다.",Toast.LENGTH_SHORT).show()
+                } else {
+                    if(isShop) showDialogForOrderInShop()
+                    else {
+                        //거리가 200이상이라면
+                        if(!mainActivity.isNear) showDialogForOrderTakeoutOver200m()
+                        else mainActivity.completedOrder()
+                    }
                 }
-            }
-
+            })
         }
-        shoppingListAdapter!!.boardClickListener=object : ShoppingListAdapter.OnBoardClickListener{
+        shoppingListAdapter.setOnBoardClickListener(object : ShoppingListAdapter.OnBoardClickListener{
             override fun onBoardItemClick(view: View, position: Int) {
-
-
-                totalprice-= shoppingList[position].totalPrice
-                totalcnt-=shoppingList[position].menuCnt
-
-                binding.textShoppingCount.setText("총 ${totalcnt}개")
-                binding.textShoppingMoney.setText("${totalprice} 원")
-                shoppingList.removeAt(position)
-                shoppingListAdapter!!.notifyDataSetChanged()
-
-
+                mainActivity.shppingListViewModel.removeItem(position)
+                shoppingListAdapter.notifyDataSetChanged()
+                initTotal()
             }
-        }
-
-
+        })
     }
-
-
 
     override fun onDestroy() {
         super.onDestroy()
         mainActivity.hideBottomNav(false)
     }
 
-
-
-
     private fun showDialogForOrderInShop() {
-        val builder: AlertDialog.Builder = AlertDialog.Builder(requireContext())
-        builder.setTitle("알림")
-        builder.setMessage(
-            "Table NFC를 찍어주세요.\n"
-        )
-        builder.setCancelable(true)
-        val listener = DialogInterface.OnClickListener{ _, i: Int ->
-            when(i){
+        val listener = DialogInterface.OnClickListener { dialog, which ->
+            when(which) {
                 DialogInterface.BUTTON_NEGATIVE -> {
-                    (context as MainActivity).flag=false
+                    mainActivity.readable = false
                 }
             }
         }
-        builder.setNegativeButton("확인"
-        ) {
-                dialog, _ -> dialog.cancel()
-           listener
-        }
-        ad = builder.create()
-        ad.show()
-        (context as MainActivity).flag=true
 
+        AlertDialog.Builder(mainActivity)
+            .setTitle("알림")
+            .setMessage("Table NFC를 찍어주세요")
+            .setNegativeButton("확인", listener)
+            .show()
 
+        mainActivity.readable = true
     }
 
     private fun showDialogForOrderTakeoutOver200m() {
@@ -179,56 +158,11 @@ class ShoppingListFragment : Fragment(){
         )
         builder.setCancelable(true)
         builder.setPositiveButton("확인") { _, _ ->
-            completedOrder()
+            mainActivity.completedOrder()
         }
         builder.setNegativeButton("취소"
         ) { dialog, _ -> dialog.cancel() }
         builder.create().show()
-    }
-
-    private fun completedOrder(){
-        Log.e("complete", "completedOrder: ", )
-        var details = ArrayList<OrderDetail>()
-        var quantity = 0
-        var totalprice = 0
-        var topImg =""
-        var topProductName = ""
-        for(item in shoppingList){
-            if(quantity==0){
-                topImg = item.menuImg
-                topProductName = item.menuName
-            }
-            var orderDetail = OrderDetail(item.menuId, item.menuCnt)
-            quantity+=item.menuCnt
-            totalprice+=item.totalPrice
-            details.add(orderDetail)
-
-
-        }
-
-        var order = Order(-1,ApplicationClass.sharedPreferencesUtil.getUser().id, tableN, System.currentTimeMillis().toString(), "N",details)
-        order.totalQnanty=quantity
-        order.totalPrice = totalprice
-        order.topImg = topImg
-        order.topProductName = topProductName
-
-        OrderService().insert(order, OrderCallback())
-        Toast.makeText(context,"주문이 완료되었습니다.",Toast.LENGTH_SHORT).show()
-        shoppingList.clear()
-
-    }
-
-    inner class OrderCallback: RetrofitCallback<Int> {
-
-        override fun onError(t: Throwable) {
-        }
-
-        override fun onFailure(code: Int) {
-        }
-
-        override fun onSuccess(code: Int, responseData: Int) {
-            mainActivity.openFragment(6)
-        }
     }
 
     companion object {

@@ -19,7 +19,6 @@ import com.ssafy.smartstore.R
 import com.ssafy.smartstore.activity.MainActivity
 import com.ssafy.smartstore.adapter.CommentAdapter
 import com.ssafy.smartstore.config.ApplicationClass
-import com.ssafy.smartstore.config.ApplicationClass.Companion.shoppingList
 import com.ssafy.smartstore.databinding.FragmentMenuDetailBinding
 import com.ssafy.smartstore.dto.Comment
 import com.ssafy.smartstore.dto.Product
@@ -113,11 +112,11 @@ class MenuDetailFragment : Fragment(){
                 menuCnt,
                 product.price,
                 totalPrice,
-                product.type
-
+//                product.type
             )
 
-            shoppingList.add(shoppingCart)
+            mainActivity.shppingListViewModel.addItem(shoppingCart)
+//            shoppingList.add(shoppingCart)
             Toast.makeText(context, "상품이 장바구니에 담겼습니다.", Toast.LENGTH_SHORT).show()
         }
         binding.btnCreateComment.setOnClickListener {
@@ -146,7 +145,7 @@ class MenuDetailFragment : Fragment(){
             binding.textMenuCount.text = count.toString()
         }
 
-        commentAdapter.btnClickLister = object : CommentAdapter.CommentClickListener {
+        commentAdapter.setBtnClickListener(object : CommentAdapter.CommentClickListener {
             override fun onClick(holder: CommentAdapter.CommentHolder, position: Int, button: Int) {
                 when(button) {
                     ApplicationClass.MODIFY -> {
@@ -187,7 +186,7 @@ class MenuDetailFragment : Fragment(){
                     }
                 }
             }
-        }
+        })
     }
 
     override fun onDestroy() {

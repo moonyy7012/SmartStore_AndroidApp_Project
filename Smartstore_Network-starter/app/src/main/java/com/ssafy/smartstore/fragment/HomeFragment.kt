@@ -1,45 +1,25 @@
 package com.ssafy.smartstore.fragment
 
-import android.Manifest
-import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothManager
 import android.content.Context
-import android.content.Context.BLUETOOTH_SERVICE
-import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Bundle
-import android.os.RemoteException
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.ssafy.smartstore.activity.MainActivity
 import com.ssafy.smartstore.adapter.LatestOrderAdapter
 import com.ssafy.smartstore.adapter.NoticeAdapter
 import com.ssafy.smartstore.config.ApplicationClass
-import com.ssafy.smartstore.config.ApplicationClass.Companion.notiIdx
-import com.ssafy.smartstore.config.ApplicationClass.Companion.notiList
+import com.ssafy.smartstore.config.ApplicationClass.Companion.noticeIdx
+import com.ssafy.smartstore.config.ApplicationClass.Companion.noticeList
 import com.ssafy.smartstore.databinding.FragmentHomeBinding
 import com.ssafy.smartstore.dto.Notification
 import com.ssafy.smartstore.dto.ShoppingCart
-import com.ssafy.smartstore.dto.UserOrderDetail
 import com.ssafy.smartstore.response.LatestOrderResponse
-import com.ssafy.smartstore.response.OrderDetailResponse
 import com.ssafy.smartstore.service.OrderService
-import com.ssafy.smartstore.service.UserService
-import com.ssafy.smartstore.util.RetrofitCallback
-import org.altbeacon.beacon.*
 
 private const val TAG = " HomeFrag_싸피"
 // Home 탭
@@ -77,13 +57,13 @@ class HomeFragment : Fragment() {
 
 
 
-    fun initAdapter() {
-        if (notiList.size == 0){
-            notiList.add(Notification(notiIdx++,"싸피벅스에 오신 것을 환영합니다. ${ApplicationClass.sharedPreferencesUtil.getUser().name}님"))
+    private fun initAdapter() {
+        if (noticeList.size == 0){
+            noticeList.add(Notification(noticeIdx++,"싸피벅스에 오신 것을 환영합니다. ${ApplicationClass.sharedPreferencesUtil.getUser().name}님"))
         }
 
         noticeAdapter = NoticeAdapter()
-        noticeAdapter.setList(notiList)
+        noticeAdapter.setList(noticeList)
 
         binding.recyclerViewNoticeOrder.apply {
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
@@ -95,8 +75,8 @@ class HomeFragment : Fragment() {
 
         noticeAdapter.onItemClickListener = object : NoticeAdapter.OnItemClickListener {
             override fun onClick(view: View, position: Int) {
-                notiList.removeAt(position)
-                noticeAdapter.setList(notiList)
+                noticeList.removeAt(position)
+                noticeAdapter.setList(noticeList)
                 noticeAdapter.notifyDataSetChanged()
             }
 
@@ -110,11 +90,7 @@ class HomeFragment : Fragment() {
             latestOrderAdapter.setItemClickListener(object : LatestOrderAdapter.ItemClickListener {
                 override fun onClick(view: View, position: Int, orderId: Int) {
                     Log.d(TAG, "onClick: $orderId")
-                    ApplicationClass.latestMode = 1
-                    Thread.sleep(200L)
-
                     mainActivity.openFragment(1,"orderId",orderId)
-
                 }
             })
             binding.recyclerViewLatestOrder.apply {

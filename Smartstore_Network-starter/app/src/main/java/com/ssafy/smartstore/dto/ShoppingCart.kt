@@ -7,5 +7,5 @@ data class ShoppingCart (
     var menuCnt: Int,
     val menuPrice: Int,
     var totalPrice: Int = menuCnt*menuPrice,
-    val type: String
+//    val type: String
 )

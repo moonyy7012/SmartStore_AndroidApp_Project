@@ -33,14 +33,12 @@ import com.ssafy.smartstore.*
 import com.ssafy.smartstore.R
 import com.ssafy.smartstore.adapter.OrderDetailListAdapter
 import com.ssafy.smartstore.config.ApplicationClass
-import com.ssafy.smartstore.config.ApplicationClass.Companion.isNear
-import com.ssafy.smartstore.config.ApplicationClass.Companion.shoppingList
-import com.ssafy.smartstore.config.ApplicationClass.Companion.tableN
 import com.ssafy.smartstore.config.ShoppingListViewModel
 import com.ssafy.smartstore.dto.Order
 import com.ssafy.smartstore.dto.OrderDetail
 import com.ssafy.smartstore.fragment.*
 import com.ssafy.smartstore.service.OrderService
+import com.ssafy.smartstore.util.CommonUtils
 import com.ssafy.smartstore.util.RetrofitCallback
 import org.altbeacon.beacon.*
 import java.util.*
@@ -49,9 +47,12 @@ private const val TAG = "MainActivity_싸피"
 class MainActivity : AppCompatActivity(), BeaconConsumer {
     private lateinit var bottomNavigation : BottomNavigationView
     var orderId = -1
-    private val shppingListViewModel: ShoppingListViewModel by lazy {
+    val shppingListViewModel: ShoppingListViewModel by lazy {
         ViewModelProvider(this)[ShoppingListViewModel::class.java]
     }
+    private var tableN = ""
+    var readable = false
+    var isNear = false
 
     // beacon
     private lateinit var beaconManager: BeaconManager
@@ -330,6 +331,10 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
                         beaconManager.stopMonitoringBeaconsInRegion(region)
                         beaconManager.stopRangingBeaconsInRegion(region)
                     }
+
+                    if (beacon.distance <= 200) {
+                        isNear = true
+                    }
                 }
             }
         }
@@ -387,12 +392,10 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
             }
             Log.d(TAG, "showDialog: success")
         }
-        isNear=true
-
     }
 
     //Tag 데이터를 추출하는 함수
-    fun getNFCData(intent: Intent){
+    private fun getNFCData(intent: Intent){
         val rawMsgs = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES)
 
         if(rawMsgs!=null){
@@ -413,48 +416,49 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
             }
         }
     }
-    private fun completedOrder(){
-        Log.e("complete", "completedOrder: ", )
-        var details = ArrayList<OrderDetail>()
+
+    fun completedOrder() {
+        val orders = ArrayList<OrderDetail>()
         var quantity = 0
-        var totalprice = 0
-        var topImg =""
-        var topProductName = ""
-        for(item in shoppingList){
-            if(quantity == 0){
-                topImg = item.menuImg
-                topProductName = item.menuName
+        var sum = 0
+
+        shppingListViewModel.shoppingList.observe(this, { list ->
+            Log.d(TAG, "completedOrder: $list")
+            for (item in list) {
+                orders.add(OrderDetail(item.menuId, item.menuCnt))
+                quantity += item.menuCnt
+                sum += item.totalPrice
             }
-            var orderDetail = OrderDetail(item.menuId, item.menuCnt)
-            quantity+=item.menuCnt
-            totalprice+=item.totalPrice
-            details.add(orderDetail)
 
-        }
+            val order = Order().apply {
+                userId = ApplicationClass.sharedPreferencesUtil.getUser().id
+                orderTable = tableN
+                orderTime = CommonUtils.getFormattedString(System.currentTimeMillis())
+                details = orders
+                totalQuantity = quantity
+                totalPrice = sum
+                topProductName = list[0].menuName
+                topImg = list[0].menuImg
+            }
 
-        var order = Order(-1,ApplicationClass.sharedPreferencesUtil.getUser().id, tableN, System.currentTimeMillis().toString(), "N",details)
-        order.totalQnanty=quantity
-        order.totalPrice = totalprice
-        order.topImg = topImg
-        order.topProductName = topProductName
-        order.orderTable=tableN
-        OrderService().insert(order, this.OrderCallback())
-
-        Toast.makeText(this,"주문이 완료되었습니다.",Toast.LENGTH_SHORT).show()
-        flag=false
-        shoppingList.clear()
+            OrderService().addOrder(order, OrderCallback())
+        })
     }
 
     inner class OrderCallback: RetrofitCallback<Int> {
+        override fun onSuccess(code: Int, responseData: Int) {
+            Toast.makeText(this@MainActivity, "주문이 완료되었습니다.", Toast.LENGTH_SHORT).show()
+            readable = false
+            shppingListViewModel.clearCart()
+            this@MainActivity.openFragment(6)
+        }
 
         override fun onError(t: Throwable) {
+            Log.d(TAG, t.message ?: "주문정보 불러오는 중 통신오류")
         }
 
         override fun onFailure(code: Int) {
-        }
-
-        override fun onSuccess(code: Int, responseData: Int) {
-            this@MainActivity.openFragment(6)
+            Log.d(TAG, "onResponse: Error Code $code")
         }
     }
 
@@ -476,13 +480,12 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
         nfcAdapter!!.disableForegroundDispatch(this)
     }
 
-    var flag = false
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
         Log.e("INFO", "onNewIntent called...")
         Log.e(TAG, "${intent!!.action}", )
 
-        if(flag==true&&intent.action.equals(NfcAdapter.ACTION_TAG_DISCOVERED)){
+        if(readable == true && intent.action.equals(NfcAdapter.ACTION_TAG_DISCOVERED)){
             getNFCData(intent)
         }
     }

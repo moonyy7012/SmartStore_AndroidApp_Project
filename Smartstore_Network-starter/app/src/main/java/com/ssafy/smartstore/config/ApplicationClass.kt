@@ -28,17 +28,8 @@ class ApplicationClass : Application() {
         lateinit var sharedPreferencesUtil: SharedPreferencesUtil
         lateinit var retrofit: Retrofit
 
-        var notiIdx = 0
-        var notiList = ArrayList<Notification>()
-
-        var shoppingList = mutableListOf<ShoppingCart>()
-
-        // 최근주문 모드
-        var latestMode = 0
-
-        var liveCnt = MutableLiveData<Int>()
-        var tableN = ""
-        var isNear = false
+        var noticeIdx = 0
+        var noticeList = ArrayList<Notification>()
 
         // comment button
         const val MODIFY = 1

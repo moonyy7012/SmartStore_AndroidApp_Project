@@ -19,7 +19,11 @@ class CommentAdapter(var list:List<MenuDetailWithCommentResponse> ) :RecyclerVie
     interface CommentClickListener {
         fun onClick(holder: CommentHolder, position: Int, button: Int)
     }
-    lateinit var btnClickLister: CommentClickListener
+    private lateinit var btnClickLister: CommentClickListener
+
+    fun setBtnClickListener(commentClickListener: CommentClickListener) {
+        btnClickLister = commentClickListener
+    }
 
 
     inner class CommentHolder(itemView: View) : RecyclerView.ViewHolder(itemView){

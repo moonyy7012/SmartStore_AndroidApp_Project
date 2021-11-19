@@ -4,13 +4,14 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.ssafy.smartstore.dto.ShoppingCart
+import com.ssafy.smartstore.response.OrderDetailResponse
 
 class ShoppingListViewModel : ViewModel() {
     private val _shoppingList = MutableLiveData<MutableList<ShoppingCart>>().apply {
         value = mutableListOf()
     }
 
-    val shppingList: LiveData<MutableList<ShoppingCart>>
+    val shoppingList: LiveData<MutableList<ShoppingCart>>
         get() = _shoppingList
 
     fun addItem(item: ShoppingCart) {
