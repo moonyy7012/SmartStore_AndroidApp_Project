@@ -31,12 +31,11 @@ class ApplicationClass : Application() {
         var notiIdx = 0
         var notiList = ArrayList<Notification>()
 
-        var shoppingList = mutableListOf<ShoppingCart>()
+//        var shoppingList = mutableListOf<ShoppingCart>()
 
         // 최근주문 모드
         var latestMode = 0
 
-        var liveCnt = MutableLiveData<Int>()
         var flag = false
         var tableN = ""
 

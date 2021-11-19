@@ -25,6 +25,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -35,6 +36,7 @@ import com.ssafy.smartstore.config.ApplicationClass
 import com.ssafy.smartstore.config.ApplicationClass.Companion.flag
 import com.ssafy.smartstore.config.ApplicationClass.Companion.shoppingList
 import com.ssafy.smartstore.config.ApplicationClass.Companion.tableN
+import com.ssafy.smartstore.config.ShoppingListViewModel
 import com.ssafy.smartstore.dto.Order
 import com.ssafy.smartstore.dto.OrderDetail
 import com.ssafy.smartstore.fragment.*
@@ -47,6 +49,9 @@ private const val TAG = "MainActivity_싸피"
 class MainActivity : AppCompatActivity(), BeaconConsumer {
     private lateinit var bottomNavigation : BottomNavigationView
     var orderId = -1
+    private val shppingListViewModel: ShoppingListViewModel by lazy {
+        ViewModelProvider(this)[ShoppingListViewModel::class.java]
+    }
 
     // beacon
     private lateinit var beaconManager: BeaconManager
@@ -191,8 +196,8 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
         i.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
         pIntent = PendingIntent.getActivity(this, 0, i, 0)
 
-        val tag_filter = IntentFilter(NfcAdapter.ACTION_TAG_DISCOVERED)
-        filters = arrayOf(tag_filter)
+        val tagFilter = IntentFilter(NfcAdapter.ACTION_TAG_DISCOVERED)
+        filters = arrayOf(tagFilter)
     }
 
     private fun setBeacon(){
@@ -436,7 +441,7 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
         OrderService().insert(order, this.OrderCallback())
 
         Toast.makeText(this,"주문이 완료되었습니다.",Toast.LENGTH_SHORT).show()
-        shoppingList.clear()
+
         flag=false
     }
 
