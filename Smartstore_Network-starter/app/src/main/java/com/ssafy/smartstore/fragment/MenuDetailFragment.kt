@@ -102,9 +102,12 @@ class MenuDetailFragment : Fragment(){
 
             override fun onRemoveClick(view: View, position: Int, commentId: Int) {
                 CommentService().delete(commentId)
-                Toast.makeText(context, "댓글 삭제 완료", Toast.LENGTH_SHORT).show()
 
                 ProductService().getProductWithComments(productId, ProductWithCommentInsertCallback())
+                commentAdapter.notifyDataSetChanged()
+                Toast.makeText(context, "댓글 삭제 완료", Toast.LENGTH_SHORT).show()
+
+
             }
 
             override fun onSaveClick(view: View, position: Int, commentId: Int) {
@@ -136,8 +139,8 @@ class MenuDetailFragment : Fragment(){
         productPrice=menu.productPrice
         binding.txtMenuName.text = menu.productName
         binding.txtMenuPrice.text = "${CommonUtils.makeComma(menu.productPrice)}"
-        binding.txtRating.text = "${(round(menu.productRatingAvg*10) /10)}점"
-        binding.ratingBar.rating = menu.productRatingAvg.toFloat()/2
+        binding.txtRating.text = "${menu.productRatingAvg}점"
+        binding.ratingBar.rating = menu.productRatingAvg.toFloat()
 
         commentAdapter.notifyDataSetChanged()
 
