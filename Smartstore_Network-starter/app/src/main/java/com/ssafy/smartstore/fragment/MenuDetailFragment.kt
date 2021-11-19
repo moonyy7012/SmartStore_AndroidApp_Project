@@ -97,6 +97,8 @@ class MenuDetailFragment : Fragment(){
         binding.txtMenuPrice.text = "${CommonUtils.makeComma(menu.productPrice)}"
         binding.txtRating.text = "${(round(menu.productRatingAvg*10) /10)}점"
         binding.ratingBar.rating = menu.productRatingAvg.toFloat() / 2
+
+        commentAdapter.notifyDataSetChanged()
     }
 
     private fun initListener(){
@@ -181,7 +183,7 @@ class MenuDetailFragment : Fragment(){
                     }
                     ApplicationClass.DELETE -> {
                         val id = commentAdapter.list[position].commentId
-                        CommentService().removeComment(id)
+                        CommentService().removeComment(id, CommentCallback("delete"))
                     }
                 }
             }
@@ -210,9 +212,9 @@ class MenuDetailFragment : Fragment(){
                     )
 
                     if (comment.rating >= 0) {
-                        CommentService().updateComment(newComment)
+                        CommentService().updateComment(newComment, CommentCallback("update"))
                     } else {
-                        CommentService().addComment(newComment, CommentCallback())
+                        CommentService().addComment(newComment, CommentCallback("add"))
                     }
                 }
             }
@@ -249,10 +251,10 @@ class MenuDetailFragment : Fragment(){
                 Log.d(TAG, "initData: $responseData")
 
                 // comment 가 없을 경우 -> 들어온 response가 1개이고 해당 userId 가 null일 경우 빈 배열 Adapter 연결
-                commentAdapter = if (responseData.size == 1 && responseData[0].userId == null) {
-                    CommentAdapter(emptyList())
+                if (responseData.size == 1 && responseData[0].userId == null) {
+                    commentAdapter.list = emptyList()
                 } else {
-                    CommentAdapter(responseData)
+                    commentAdapter.list = responseData
                 }
 
                 // 화면 정보 갱신
@@ -272,19 +274,23 @@ class MenuDetailFragment : Fragment(){
         }
     }
 
-    inner class CommentCallback: RetrofitCallback<Comment> {
-        override fun onError(t: Throwable) {
-            Toast.makeText(requireContext(), "댓글 등록 실패 Error", Toast.LENGTH_SHORT).show()
-        }
-
-        override fun onSuccess(code: Int, responseData: Comment) {
-            Toast.makeText(requireContext(), "댓글이 등록되었습니다.", Toast.LENGTH_SHORT).show()
-            binding.inputComment.setText("")
+    inner class CommentCallback(private val state: String) : RetrofitCallback<Boolean> {
+        override fun onSuccess(code: Int, responseData: Boolean) {
+            Log.d(TAG, "onSuccess: $state")
+            if (state == "add") binding.inputComment.setText("")
             initData()
         }
 
+        override fun onError(t: Throwable) {
+            when(state) {
+                "add"    -> Log.d(TAG, t.message ?: "평가 등록 중 통신오류")
+                "update" -> Log.d(TAG, t.message ?: "평가 수정 중 통신오류")
+                "delete" -> Log.d(TAG, t.message ?: "평가 삭제 중 통신오류")
+            }
+        }
+
         override fun onFailure(code: Int) {
-            Toast.makeText(requireContext(), "댓글 등록 실패 Failure", Toast.LENGTH_SHORT).show()
+            Log.d(TAG, "onResponse: Error Code $code")
         }
     }
 }

@@ -1,70 +1,71 @@
 package com.ssafy.smartstore.service
 
-import android.util.Log
-import android.widget.Toast
+
 import com.ssafy.smartstore.dto.Comment
 import com.ssafy.smartstore.util.RetrofitCallback
-import com.ssafy.smartstore.util.RetrofitUtil.Companion.commentService
+import com.ssafy.smartstore.util.RetrofitUtil
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import retrofit2.http.POST
 
 private const val TAG = "CommentService_싸피"
 class CommentService {
 
-    fun addComment(comment: Comment, callback: RetrofitCallback<Comment>) {
-
-        commentService.insert(comment).enqueue(object : Callback<Boolean> {
+    fun addComment(comment: Comment, callback: RetrofitCallback<Boolean>) {
+        RetrofitUtil.commentService.insert(comment).enqueue(object : Callback<Boolean> {
             override fun onResponse(call: Call<Boolean>, response: Response<Boolean>) {
-                Log.d(TAG, "onResponse: ${response.code()}")
-                if (response.code() == 200) {
-                    callback.onSuccess(response.code(), comment)
-                    Log.d(TAG, "onResponse: 코멘트 입력성공")
+                val res = response.body()
+                if (response.isSuccessful) {
+                    if (res != null) {
+                        callback.onSuccess(response.code(), res)
+                    }
                 } else {
                     callback.onFailure(response.code())
-                    Log.d(TAG, "onResponse: ***코멘트 입력실패***")
                 }
             }
 
             override fun onFailure(call: Call<Boolean>, t: Throwable) {
-                Log.d(TAG, t.message ?: "통신오류 - ${t}")
                 callback.onError(t)
             }
+
         })
     }
 
-    fun updateComment(comment: Comment) {
-
-        commentService.update(comment).enqueue(object : Callback<Boolean> {
+    fun updateComment(comment: Comment, callback: RetrofitCallback<Boolean>) {
+        RetrofitUtil.commentService.update(comment).enqueue(object : Callback<Boolean> {
             override fun onResponse(call: Call<Boolean>, response: Response<Boolean>) {
-                Log.d(TAG, "onResponse: ${response.code()}")
-                if (response.code() == 200) {
-                    Log.d(TAG, "onResponse: 코멘트 수정성공")
+                val res = response.body()
+                if (response.isSuccessful) {
+                    if (res != null) {
+                        callback.onSuccess(response.code(), res)
+                    }
                 } else {
-                    Log.d(TAG, "onResponse: ***코멘트 수정실패***")
+                    callback.onFailure(response.code())
                 }
             }
 
             override fun onFailure(call: Call<Boolean>, t: Throwable) {
-                Log.d(TAG, t.message ?: "통신오류")
+                callback.onError(t)
             }
+
         })
     }
 
-    fun removeComment(id: Int) {
-
-        commentService.delete(id).enqueue(object : Callback<Boolean> {
+    fun removeComment(id: Int, callback: RetrofitCallback<Boolean>) {
+        RetrofitUtil.commentService.delete(id).enqueue(object : Callback<Boolean> {
             override fun onResponse(call: Call<Boolean>, response: Response<Boolean>) {
-                if (response.code() == 200) {
-                    Log.d(TAG, "onResponse: 코멘트 삭제성공")
+                val res = response.body()
+                if (response.isSuccessful) {
+                    if (res != null) {
+                        callback.onSuccess(response.code(), res)
+                    }
                 } else {
-                    Log.d(TAG, "onResponse: ***코멘트 삭제실패***")
+                    callback.onFailure(response.code())
                 }
             }
 
             override fun onFailure(call: Call<Boolean>, t: Throwable) {
-                Log.d(TAG, t.message ?: "통신오류")
+                callback.onError(t)
             }
 
         })
