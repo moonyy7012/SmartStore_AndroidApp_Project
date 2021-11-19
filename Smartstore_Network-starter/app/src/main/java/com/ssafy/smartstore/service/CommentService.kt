@@ -13,7 +13,7 @@ import retrofit2.http.POST
 private const val TAG = "CommentService_싸피"
 class CommentService {
 
-    fun insert(comment: Comment, callback: RetrofitCallback<Comment>) {
+    fun addComment(comment: Comment, callback: RetrofitCallback<Comment>) {
 
         commentService.insert(comment).enqueue(object : Callback<Boolean> {
             override fun onResponse(call: Call<Boolean>, response: Response<Boolean>) {
@@ -34,7 +34,7 @@ class CommentService {
         })
     }
 
-    fun update(comment: Comment) {
+    fun updateComment(comment: Comment) {
 
         commentService.update(comment).enqueue(object : Callback<Boolean> {
             override fun onResponse(call: Call<Boolean>, response: Response<Boolean>) {
@@ -52,7 +52,7 @@ class CommentService {
         })
     }
 
-    fun delete(id: Int) {
+    fun removeComment(id: Int) {
 
         commentService.delete(id).enqueue(object : Callback<Boolean> {
             override fun onResponse(call: Call<Boolean>, response: Response<Boolean>) {

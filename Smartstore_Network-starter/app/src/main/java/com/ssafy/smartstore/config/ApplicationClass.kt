@@ -40,6 +40,12 @@ class ApplicationClass : Application() {
         var flag = false
         var tableN = ""
 
+        // comment button
+        const val MODIFY = 1
+        const val MODIFY_ACCCEPT = 2
+        const val MODIFY_CANCEL = 3
+        const val DELETE = 4
+
 
         // 모든 퍼미션 관련 배열
         val requiredPermissions = arrayOf(
