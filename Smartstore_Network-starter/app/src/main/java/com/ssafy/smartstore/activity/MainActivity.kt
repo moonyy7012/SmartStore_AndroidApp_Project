@@ -32,7 +32,6 @@ import com.ssafy.smartstore.*
 import com.ssafy.smartstore.R
 import com.ssafy.smartstore.adapter.OrderDetailListAdapter
 import com.ssafy.smartstore.config.ApplicationClass
-import com.ssafy.smartstore.config.ApplicationClass.Companion.findbeacon
 import com.ssafy.smartstore.config.ApplicationClass.Companion.flag
 import com.ssafy.smartstore.config.ApplicationClass.Companion.shoppingList
 import com.ssafy.smartstore.config.ApplicationClass.Companion.tableN
@@ -269,7 +268,6 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
         // 사용자의 블루투스 사용이 가능한지 확인
         if (isEnableBLEService()) {
             needBLERequest = false
-            if(findbeacon)
                 startScan()
         }
     }
@@ -322,14 +320,12 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
             for (beacon in beacons) {
                 // Major, Minor로 Beacon 구별, 1미터 이내에 들어오면 다이얼로그 출력
                 if(isStoreBeacon(beacon)){
-                    if (beacon.distance <= STORE_DISTANCE) {
                         // 주문한건지 확인
-                            if(findbeacon)
                                 showPopDialog()
 
                         beaconManager.stopMonitoringBeaconsInRegion(region)
                         beaconManager.stopRangingBeaconsInRegion(region)
-                    }
+
                 }
             }
         }
@@ -367,7 +363,6 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
                     }
                     AlertDialog.Builder(this).apply {
                         setView(view)
-//                        setPositiveButton("확인", null)
                         setNegativeButton("확인"
                         ) { dialog, _ -> dialog.cancel()
                         }
@@ -383,7 +378,6 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
             }
             AlertDialog.Builder(this).apply {
                 setView(view)
-//                setPositiveButton("확인", null)
                 setNegativeButton("확인"
                 ) { dialog, _ -> dialog.cancel()
                 }
@@ -391,7 +385,6 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
             }
             Log.d(TAG, "showDialog: success")
         }
-        findbeacon=false
 
     }
 
