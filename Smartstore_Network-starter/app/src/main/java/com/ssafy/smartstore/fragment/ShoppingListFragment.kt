@@ -1,21 +1,13 @@
 package com.ssafy.smartstore.fragment
 
 import android.app.AlertDialog
-import android.app.Application
-import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
-import android.nfc.NdefMessage
-import android.nfc.NfcAdapter
-import android.nfc.Tag
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
@@ -23,7 +15,6 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ssafy.smartstore.R
-import com.ssafy.smartstore.activity.LoginActivity
 import com.ssafy.smartstore.activity.MainActivity
 
 import com.ssafy.smartstore.adapter.ShoppingListAdapter
@@ -51,7 +42,7 @@ class ShoppingListFragment : Fragment(){
     private var totalcnt = 0
     private var orderId = -1
     private lateinit var binding: FragmentShoppingListBinding
-
+    private lateinit var ad:AlertDialog
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -153,14 +144,15 @@ class ShoppingListFragment : Fragment(){
             "Table NFC를 찍어주세요.\n"
         )
         builder.setCancelable(true)
-        builder.setNegativeButton("취소"
+        builder.setNegativeButton("확인"
         ) { dialog, _ -> dialog.cancel()
         }
-        builder.create().show()
+        ad = builder.create()
+        ad.show()
 
         if(flag==true){
             completedOrder()
-
+            ad.dismiss()
         }
 
     }
@@ -206,7 +198,6 @@ class ShoppingListFragment : Fragment(){
         order.topImg = topImg
         order.topProductName = topProductName
         OrderService().insert(order,OrderCallback())
-
         Toast.makeText(context,"주문이 완료되었습니다.",Toast.LENGTH_SHORT).show()
         flag=false
         shoppingList.clear()
@@ -222,9 +213,6 @@ class ShoppingListFragment : Fragment(){
         }
 
         override fun onSuccess(code: Int, responseData: Int) {
-//            supportFragmentManager.beginTransaction()
-//                .replace(R.id.frame_layout_main, MypageFragment())
-//                .commit()
             mainActivity.openFragment(6)
         }
     }

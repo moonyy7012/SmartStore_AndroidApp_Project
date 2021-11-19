@@ -38,6 +38,7 @@ class ApplicationClass : Application() {
         var flag = false
         var tableN = ""
 
+        var findbeacon=true
 
         // 모든 퍼미션 관련 배열
         val requiredPermissions = arrayOf(
