@@ -92,9 +92,6 @@ class UserService {
 
                 if (response.code() == 200) {
                     if (res != null) {
-                        res!!.forEach { t, u ->
-                            Log.d(TAG, "onResponse: $t, $u")
-                        }
                         callback.onSuccess(response.code(), res)
                     } else {
                         callback.onFailure(response.code())
@@ -105,8 +102,6 @@ class UserService {
             override fun onFailure(call: Call<HashMap<String, Any>>, t: Throwable) {
                 callback.onError(t)
             }
-
-
         })
     }
 }
