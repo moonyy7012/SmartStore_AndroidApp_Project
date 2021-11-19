@@ -1,5 +1,6 @@
 package com.ssafy.smartstore.adapter
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -36,8 +37,12 @@ class CommentAdapter(var list:List<MenuDetailWithCommentResponse> ) :RecyclerVie
             ivModifyCancel.visibility = View.GONE
 
             if (data.userId != ApplicationClass.sharedPreferencesUtil.getUser().id) {
+                Log.d(TAG, "bindInfo : ${data.userId} / not me : ${data.commentContent}")
                 ivModify.visibility = View.GONE
                 ivDelete.visibility = View.GONE
+            } else {
+                ivModify.visibility = View.VISIBLE
+                ivDelete.visibility = View.VISIBLE
             }
         }
     }

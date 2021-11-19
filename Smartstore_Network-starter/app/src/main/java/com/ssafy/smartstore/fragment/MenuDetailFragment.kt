@@ -96,7 +96,7 @@ class MenuDetailFragment : Fragment(){
         binding.txtMenuName.text = menu.productName
         binding.txtMenuPrice.text = "${CommonUtils.makeComma(menu.productPrice)}"
         binding.txtRating.text = "${(round(menu.productRatingAvg*10) /10)}점"
-        binding.ratingBar.rating = menu.productRatingAvg.toFloat() / 2
+        binding.ratingBar.rating = menu.productRatingAvg.toFloat()
 
         commentAdapter.notifyDataSetChanged()
     }
