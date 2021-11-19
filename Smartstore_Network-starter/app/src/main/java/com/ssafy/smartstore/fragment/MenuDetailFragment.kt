@@ -1,10 +1,8 @@
 package com.ssafy.smartstore.fragment
 
 import android.app.AlertDialog
-import android.app.Dialog
 import android.content.Context
 import android.content.DialogInterface
-import android.media.Rating
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -14,7 +12,6 @@ import android.widget.EditText
 import android.widget.RatingBar
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -25,16 +22,12 @@ import com.ssafy.smartstore.config.ApplicationClass
 import com.ssafy.smartstore.config.ApplicationClass.Companion.shoppingList
 import com.ssafy.smartstore.databinding.FragmentMenuDetailBinding
 import com.ssafy.smartstore.dto.Comment
-import com.ssafy.smartstore.dto.Product
 import com.ssafy.smartstore.dto.ShoppingCart
 import com.ssafy.smartstore.response.MenuDetailWithCommentResponse
 import com.ssafy.smartstore.service.CommentService
 import com.ssafy.smartstore.service.ProductService
 import com.ssafy.smartstore.util.CommonUtils
 import com.ssafy.smartstore.util.RetrofitCallback
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlin.math.round
 
 //메뉴 상세 화면 . Order탭 - 특정 메뉴 선택시 열림
@@ -42,7 +35,6 @@ private const val TAG = "MenuDetailFragment_싸피"
 class MenuDetailFragment : Fragment(){
     private lateinit var mainActivity: MainActivity
     private var commentAdapter = CommentAdapter(emptyList())
-    private var list: List<MenuDetailWithCommentResponse> = emptyList()
     private var productId = -1
     private var productImg =""
     private var productType = "coffee"
@@ -90,8 +82,7 @@ class MenuDetailFragment : Fragment(){
         initListener()
     }
 
-//MutableLiveData<List<MenuDetailWithCommentResponse>>
-//        var withCommentLiveData = ProductService().getProductWithComments(productId)
+
     private fun initData(){
         ProductService().getProductWithComments(productId, ProductWithCommentInsertCallback())
         commentAdapter.setUserId(userId)
@@ -111,9 +102,12 @@ class MenuDetailFragment : Fragment(){
 
             override fun onRemoveClick(view: View, position: Int, commentId: Int) {
                 CommentService().delete(commentId)
-                Toast.makeText(context, "별점 삭제 완료", Toast.LENGTH_SHORT).show()
 
                 ProductService().getProductWithComments(productId, ProductWithCommentInsertCallback())
+                commentAdapter.notifyDataSetChanged()
+                Toast.makeText(context, "댓글 삭제 완료", Toast.LENGTH_SHORT).show()
+
+
             }
 
             override fun onSaveClick(view: View, position: Int, commentId: Int) {
@@ -121,11 +115,11 @@ class MenuDetailFragment : Fragment(){
                 var cObj = commentAdapter.list[position]
                 var comment = Comment(cObj.commentId, cObj.userId!!, productId, cObj.productRating.toFloat(), cObj.commentContent!!)
                 CommentService().update(comment)
-                Toast.makeText(context, "별점 수정 완료", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "댓글 수정 완료", Toast.LENGTH_SHORT).show()
             }
 
             override fun onCancelClick(view: View, position: Int, commentId: Int) {
-                Toast.makeText(context, "별점 수정 취소", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "댓글 수정 취소", Toast.LENGTH_SHORT).show()
                 Log.d(TAG, "prev : $prevComment, cur : $currentComment")
                 commentAdapter.list[position].commentContent = prevComment
                 commentAdapter.notifyDataSetChanged()
@@ -142,14 +136,12 @@ class MenuDetailFragment : Fragment(){
             .into(binding.menuImage)
 
         productImg=menu.productImg
-//        Log.d(TAG, "setScreen: ${productImg}")
         productPrice=menu.productPrice
         binding.txtMenuName.text = menu.productName
         binding.txtMenuPrice.text = "${CommonUtils.makeComma(menu.productPrice)}"
-        binding.txtRating.text = "${(round(menu.productRatingAvg*10) /10)}점"
-        binding.ratingBar.rating = menu.productRatingAvg.toFloat()/2
+        binding.txtRating.text = "${menu.productRatingAvg}점"
+        binding.ratingBar.rating = menu.productRatingAvg.toFloat()
 
-//        Log.d(TAG, "setScreen: ${commentAdapter.list}")
         commentAdapter.notifyDataSetChanged()
 
     }
@@ -157,18 +149,27 @@ class MenuDetailFragment : Fragment(){
     private fun initListener(){
         binding.btnAddList.setOnClickListener {
             var menucnt = binding.textMenuCount.text.toString().toInt()
-            var totalprice = menucnt*productPrice
+            if(menucnt==0) Toast.makeText(context, "수량을 선택하세요.", Toast.LENGTH_SHORT).show()
+            else {
+                var totalprice = menucnt * productPrice
 
 
-            var shoppingCart= ShoppingCart(productId, productImg, binding.txtMenuName.text.toString(), menucnt, productPrice, totalprice, productType)
+                var shoppingCart = ShoppingCart(
+                    productId,
+                    productImg,
+                    binding.txtMenuName.text.toString(),
+                    menucnt,
+                    productPrice,
+                    totalprice,
+                    productType
+                )
 
-            shoppingList.add(shoppingCart)
-            Toast.makeText(context,"상품이 장바구니에 담겼습니다.",Toast.LENGTH_SHORT).show()
-
+                shoppingList.add(shoppingCart)
+                Toast.makeText(context, "상품이 장바구니에 담겼습니다.", Toast.LENGTH_SHORT).show()
+            }
         }
         binding.btnCreateComment.setOnClickListener {
             showDialogRatingStar()
-            Toast.makeText(context,"버튼클릭",Toast.LENGTH_SHORT).show()
         }
 
         binding.btnAddCount.setOnClickListener {
@@ -223,7 +224,7 @@ class MenuDetailFragment : Fragment(){
         val builder = AlertDialog.Builder(requireContext())
         val v1 = layoutInflater.inflate(R.layout.dialog_menu_editcomment,null)
         builder.setView(v1)
-
+        v1.findViewById<EditText>(R.id.dialEditText).setText(commentAdapter.list[position].commentContent)
         val listener = DialogInterface.OnClickListener { dialog, which ->
             val alert = dialog as AlertDialog
 
@@ -248,17 +249,17 @@ class MenuDetailFragment : Fragment(){
 
     inner class commentCallback: RetrofitCallback<Comment> {
         override fun onError(t: Throwable) {
-            Toast.makeText(requireContext(), "별점 등록 실패 Error", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "댓글 등록 실패 Error", Toast.LENGTH_SHORT).show()
         }
 
         override fun onSuccess(code: Int, responseData: Comment) {
-            Toast.makeText(requireContext(), "별점이 등록되었습니다.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "댓글이 등록되었습니다.", Toast.LENGTH_SHORT).show()
             binding.etComment.setText("")
             initData()
         }
 
         override fun onFailure(code: Int) {
-            Toast.makeText(requireContext(), "별점 등록 실패 Failure", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "댓글 등록 실패 Failure", Toast.LENGTH_SHORT).show()
         }
 
     }
@@ -275,16 +276,6 @@ class MenuDetailFragment : Fragment(){
             }
     }
 
-    fun notifyChanged() {
-
-        binding.recyclerViewMenuDetail.apply {
-            layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
-            adapter = commentAdapter
-            //원래의 목록위치로 돌아오게함
-            adapter!!.stateRestorationPolicy =
-                RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
-        }
-    }
 
     inner class ProductWithCommentInsertCallback: RetrofitCallback<List<MenuDetailWithCommentResponse>> {
         override fun onSuccess(
