@@ -46,6 +46,7 @@ class ApplicationClass : Application() {
         const val MODIFY_CANCEL = 3
         const val DELETE = 4
 
+        var findbeacon = true
 
         // 모든 퍼미션 관련 배열
         val requiredPermissions = arrayOf(
