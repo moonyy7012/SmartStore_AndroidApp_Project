@@ -1,10 +1,8 @@
 package com.ssafy.smartstore.fragment
 
 import android.app.AlertDialog
-import android.app.Dialog
 import android.content.Context
 import android.content.DialogInterface
-import android.media.Rating
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -14,7 +12,6 @@ import android.widget.EditText
 import android.widget.RatingBar
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -25,16 +22,12 @@ import com.ssafy.smartstore.config.ApplicationClass
 import com.ssafy.smartstore.config.ApplicationClass.Companion.shoppingList
 import com.ssafy.smartstore.databinding.FragmentMenuDetailBinding
 import com.ssafy.smartstore.dto.Comment
-import com.ssafy.smartstore.dto.Product
 import com.ssafy.smartstore.dto.ShoppingCart
 import com.ssafy.smartstore.response.MenuDetailWithCommentResponse
 import com.ssafy.smartstore.service.CommentService
 import com.ssafy.smartstore.service.ProductService
 import com.ssafy.smartstore.util.CommonUtils
 import com.ssafy.smartstore.util.RetrofitCallback
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlin.math.round
 
 //메뉴 상세 화면 . Order탭 - 특정 메뉴 선택시 열림
@@ -42,7 +35,6 @@ private const val TAG = "MenuDetailFragment_싸피"
 class MenuDetailFragment : Fragment(){
     private lateinit var mainActivity: MainActivity
     private var commentAdapter = CommentAdapter(emptyList())
-    private var list: List<MenuDetailWithCommentResponse> = emptyList()
     private var productId = -1
     private var productImg =""
     private var productType = "coffee"
@@ -90,8 +82,7 @@ class MenuDetailFragment : Fragment(){
         initListener()
     }
 
-//MutableLiveData<List<MenuDetailWithCommentResponse>>
-//        var withCommentLiveData = ProductService().getProductWithComments(productId)
+
     private fun initData(){
         ProductService().getProductWithComments(productId, ProductWithCommentInsertCallback())
         commentAdapter.setUserId(userId)
@@ -223,7 +214,7 @@ class MenuDetailFragment : Fragment(){
         val builder = AlertDialog.Builder(requireContext())
         val v1 = layoutInflater.inflate(R.layout.dialog_menu_editcomment,null)
         builder.setView(v1)
-
+        v1.findViewById<EditText>(R.id.dialEditText).setText(commentAdapter.list[position].commentContent)
         val listener = DialogInterface.OnClickListener { dialog, which ->
             val alert = dialog as AlertDialog
 
