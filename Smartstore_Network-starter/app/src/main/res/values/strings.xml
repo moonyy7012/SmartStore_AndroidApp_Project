@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">Smartstore</string>
     <string name="name">벼락부자핫도그</string>
+    <string name="level">%1$s %2$d 단계</string>
+    <string name="next_level">%1$d/10</string>
+    <string name="level_rest">"다음 레벨까지 %1$d잔 남았습니다."</string>
 </resources>
