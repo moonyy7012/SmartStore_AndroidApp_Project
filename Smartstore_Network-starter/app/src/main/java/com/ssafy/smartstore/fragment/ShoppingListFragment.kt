@@ -2,6 +2,7 @@ package com.ssafy.smartstore.fragment
 
 import android.app.AlertDialog
 import android.content.Context
+import android.content.DialogInterface
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -19,7 +20,7 @@ import com.ssafy.smartstore.activity.MainActivity
 
 import com.ssafy.smartstore.adapter.ShoppingListAdapter
 import com.ssafy.smartstore.config.ApplicationClass
-import com.ssafy.smartstore.config.ApplicationClass.Companion.flag
+import com.ssafy.smartstore.config.ApplicationClass.Companion.isNear
 import com.ssafy.smartstore.config.ApplicationClass.Companion.shoppingList
 import com.ssafy.smartstore.config.ApplicationClass.Companion.tableN
 import com.ssafy.smartstore.databinding.FragmentShoppingListBinding
@@ -102,11 +103,18 @@ class ShoppingListFragment : Fragment(){
             isShop = false
         }
         btnOrder.setOnClickListener {
-            if(isShop) showDialogForOrderInShop()
-            else {
-                //거리가 200이상이라면
-                if(true) showDialogForOrderTakeoutOver200m()
+            if(shoppingList.isEmpty()){
+                Toast.makeText(context,"주문할 상품이 없습니다.",Toast.LENGTH_SHORT).show()
+            }else{
+                if(isShop) showDialogForOrderInShop()
+                else {
+                    //거리가 200이상이라면
+                    if(!isNear) showDialogForOrderTakeoutOver200m()
+                    else completedOrder()
+
+                }
             }
+
         }
         shoppingListAdapter!!.boardClickListener=object : ShoppingListAdapter.OnBoardClickListener{
             override fun onBoardItemClick(view: View, position: Int) {
@@ -144,16 +152,22 @@ class ShoppingListFragment : Fragment(){
             "Table NFC를 찍어주세요.\n"
         )
         builder.setCancelable(true)
+        val listener = DialogInterface.OnClickListener{ _, i: Int ->
+            when(i){
+                DialogInterface.BUTTON_NEGATIVE -> {
+                    (context as MainActivity).flag=false
+                }
+            }
+        }
         builder.setNegativeButton("확인"
-        ) { dialog, _ -> dialog.cancel()
+        ) {
+                dialog, _ -> dialog.cancel()
+           listener
         }
         ad = builder.create()
         ad.show()
+        (context as MainActivity).flag=true
 
-        if(flag==true){
-            completedOrder()
-            ad.dismiss()
-        }
 
     }
 
@@ -197,9 +211,9 @@ class ShoppingListFragment : Fragment(){
         order.totalPrice = totalprice
         order.topImg = topImg
         order.topProductName = topProductName
-        OrderService().insert(order,OrderCallback())
+
+        OrderService().insert(order, OrderCallback())
         Toast.makeText(context,"주문이 완료되었습니다.",Toast.LENGTH_SHORT).show()
-        flag=false
         shoppingList.clear()
 
     }

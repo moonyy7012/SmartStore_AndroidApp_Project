@@ -37,8 +37,8 @@ class ApplicationClass : Application() {
         var latestMode = 0
 
         var liveCnt = MutableLiveData<Int>()
-        var flag = false
         var tableN = ""
+        var isNear = false
 
         // comment button
         const val MODIFY = 1
