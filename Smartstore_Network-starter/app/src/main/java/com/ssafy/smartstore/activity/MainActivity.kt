@@ -324,6 +324,7 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
                         showPopDialog()
                         beaconManager.stopMonitoringBeaconsInRegion(region)
                         beaconManager.stopRangingBeaconsInRegion(region)
+                        beaconManager.unbind(this)
                     }
                 }
             }
@@ -345,6 +346,7 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
     private fun showPopDialog() {
         val view = layoutInflater.inflate(R.layout.dialog_popup, null)
 
+        Log.d(TAG, "showPopDialog: $orderId")
         if (orderId > 0) {
             val orderList = OrderService().getOrderDetails(orderId)
 
@@ -369,14 +371,16 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
                 })
             }
         } else {
-            view.apply {
-                findViewById<TextView>(R.id.tvVoid).visibility = View.VISIBLE
-                findViewById<RecyclerView>(R.id.dialogRecycler).visibility = View.GONE
-            }
-            AlertDialog.Builder(this).apply {
-                setView(view)
-                setPositiveButton("확인", null)
-                show()
+            runOnUiThread {
+                view.apply {
+                    findViewById<TextView>(R.id.tvVoid).visibility = View.VISIBLE
+                    findViewById<RecyclerView>(R.id.dialogRecycler).visibility = View.GONE
+                }
+                AlertDialog.Builder(this).apply {
+                    setView(view)
+                    setPositiveButton("확인", null)
+                    show()
+                }
             }
             Log.d(TAG, "showDialog: success")
         }
