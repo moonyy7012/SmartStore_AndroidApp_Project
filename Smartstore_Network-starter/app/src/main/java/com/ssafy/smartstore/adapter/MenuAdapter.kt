@@ -25,7 +25,7 @@ class MenuAdapter(var productList:List<Product>) :RecyclerView.Adapter<MenuAdapt
                 .into(menuImage)
 
             itemView.setOnClickListener{
-                itemClickListner.onClick(it, layoutPosition, productList[layoutPosition].id)
+                itemClickListener.onClick(it, layoutPosition, productList[layoutPosition].id)
             }
         }
     }
@@ -50,10 +50,10 @@ class MenuAdapter(var productList:List<Product>) :RecyclerView.Adapter<MenuAdapt
         fun onClick(view: View,  position: Int, productId:Int)
     }
     //클릭리스너 선언
-    private lateinit var itemClickListner: ItemClickListener
+    private lateinit var itemClickListener: ItemClickListener
     //클릭리스너 등록 매소드
     fun setItemClickListener(itemClickListener: ItemClickListener) {
-        this.itemClickListner = itemClickListener
+        this.itemClickListener = itemClickListener
     }
 }
 
