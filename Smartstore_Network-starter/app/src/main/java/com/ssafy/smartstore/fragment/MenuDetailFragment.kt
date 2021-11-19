@@ -146,14 +146,24 @@ class MenuDetailFragment : Fragment(){
     private fun initListener(){
         binding.btnAddList.setOnClickListener {
             var menucnt = binding.textMenuCount.text.toString().toInt()
-            var totalprice = menucnt*productPrice
+            if(menucnt==0) Toast.makeText(context, "수량을 선택하세요.", Toast.LENGTH_SHORT).show()
+            else {
+                var totalprice = menucnt * productPrice
 
 
-            var shoppingCart= ShoppingCart(productId, productImg, binding.txtMenuName.text.toString(), menucnt, productPrice, totalprice, productType)
+                var shoppingCart = ShoppingCart(
+                    productId,
+                    productImg,
+                    binding.txtMenuName.text.toString(),
+                    menucnt,
+                    productPrice,
+                    totalprice,
+                    productType
+                )
 
-            shoppingList.add(shoppingCart)
-            Toast.makeText(context,"상품이 장바구니에 담겼습니다.",Toast.LENGTH_SHORT).show()
-
+                shoppingList.add(shoppingCart)
+                Toast.makeText(context, "상품이 장바구니에 담겼습니다.", Toast.LENGTH_SHORT).show()
+            }
         }
         binding.btnCreateComment.setOnClickListener {
             showDialogRatingStar()
