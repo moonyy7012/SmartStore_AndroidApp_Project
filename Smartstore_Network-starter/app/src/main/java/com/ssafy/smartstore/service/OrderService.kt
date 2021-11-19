@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.ssafy.smartstore.config.ApplicationClass.Companion.latestMode
+import com.ssafy.smartstore.config.ApplicationClass.Companion.latestOrderId
 import com.ssafy.smartstore.config.ApplicationClass.Companion.shoppingList
 import com.ssafy.smartstore.dto.*
 import com.ssafy.smartstore.response.LatestOrderResponse
@@ -149,6 +150,7 @@ class OrderService{
         }
         val list = ArrayList<LatestOrderResponse>(hm.values)
         list.sortWith { o1, o2 -> o2.orderDate.compareTo(o1.orderDate) }
+        latestOrderId=list[0].orderId
         return list
     }
     fun insert(order:Order, callback: RetrofitCallback<Int>)  {

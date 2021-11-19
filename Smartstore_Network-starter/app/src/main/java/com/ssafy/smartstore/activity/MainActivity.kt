@@ -33,6 +33,7 @@ import com.ssafy.smartstore.R
 import com.ssafy.smartstore.adapter.OrderDetailListAdapter
 import com.ssafy.smartstore.config.ApplicationClass
 import com.ssafy.smartstore.config.ApplicationClass.Companion.isNear
+import com.ssafy.smartstore.config.ApplicationClass.Companion.latestOrderId
 import com.ssafy.smartstore.config.ApplicationClass.Companion.shoppingList
 import com.ssafy.smartstore.config.ApplicationClass.Companion.tableN
 import com.ssafy.smartstore.dto.Order
@@ -46,7 +47,6 @@ import java.util.*
 private const val TAG = "MainActivity_싸피"
 class MainActivity : AppCompatActivity(), BeaconConsumer {
     private lateinit var bottomNavigation : BottomNavigationView
-    var orderId = -1
 
     // beacon
     private lateinit var beaconManager: BeaconManager
@@ -345,8 +345,8 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
     private fun showPopDialog() {
         val view = layoutInflater.inflate(R.layout.dialog_popup, null)
 
-        if (orderId > 0) {
-            val orderList = OrderService().getOrderDetails(orderId)
+        if (latestOrderId > 0) {
+            val orderList = OrderService().getOrderDetails(latestOrderId)
 
             runOnUiThread {
                 orderList.observe(this, { orderDetails ->
