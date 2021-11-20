@@ -28,22 +28,34 @@
     </LinearLayout>
 
     <TextView
-        android:id="@+id/menu"
+        android:id="@+id/Favorite"
+        style="@style/Text.Title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="MENU"
-        android:textSize="30dp"
-        android:textColor="@color/coffee_point_red"
-        style="@style/Text.Title"
         android:layout_below="@+id/linear"
-        android:layout_marginBottom="20dp"/>
+        android:layout_marginBottom="20dp"
+        android:text="MENU"
+        android:textColor="@color/coffee_point_red"
+        android:textSize="30dp" />
+
+    <EditText
+        android:id="@+id/searchMenu"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/Favorite"
+        android:layout_marginHorizontal="10sp"
+        android:layout_marginTop="2sp"
+        android:hint="메뉴 검색"
+        android:lines="1"
+        app:layout_constraintBottom_toTopOf="@id/Favorite"
+        app:layout_constraintLeft_toLeftOf="parent" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewMenu"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/searchMenu"
         android:layout_weight="1"
-        android:layout_below="@+id/menu"
         tools:layout_height="1500dp" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton

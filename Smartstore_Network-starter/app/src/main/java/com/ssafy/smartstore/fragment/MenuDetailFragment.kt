@@ -19,15 +19,21 @@ import com.ssafy.smartstore.R
 import com.ssafy.smartstore.activity.MainActivity
 import com.ssafy.smartstore.adapter.CommentAdapter
 import com.ssafy.smartstore.config.ApplicationClass
+//import com.ssafy.smartstore.config.ApplicationClass.Companion.shoppingList
+//import com.ssafy.smartstore.database.FavoriteDto
 import com.ssafy.smartstore.databinding.FragmentMenuDetailBinding
 import com.ssafy.smartstore.dto.Comment
 import com.ssafy.smartstore.dto.Product
 import com.ssafy.smartstore.dto.ShoppingCart
+import com.ssafy.smartstore.repository.FavoriteRepository
 import com.ssafy.smartstore.response.MenuDetailWithCommentResponse
 import com.ssafy.smartstore.service.CommentService
 import com.ssafy.smartstore.service.ProductService
 import com.ssafy.smartstore.util.CommonUtils
 import com.ssafy.smartstore.util.RetrofitCallback
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlin.math.round
 
 //메뉴 상세 화면 . Order탭 - 특정 메뉴 선택시 열림
@@ -37,8 +43,11 @@ class MenuDetailFragment : Fragment(){
     private var commentAdapter = CommentAdapter(emptyList())
     private lateinit var product: Product
     private var productId = -1
+    private lateinit var favoriteDto:FavoriteDto
+
 
     private lateinit var binding:FragmentMenuDetailBinding
+    private lateinit var favoriteRepository: FavoriteRepository
 
 
     override fun onAttach(context: Context) {
@@ -71,8 +80,22 @@ class MenuDetailFragment : Fragment(){
 
         initData()
         initListener()
+        setfavorite()
     }
+    private fun setfavorite(){
+        favoriteRepository= FavoriteRepository.get()
+        CoroutineScope(Dispatchers.IO).launch {
+            if(favoriteRepository.getFavorite(productId)==null){
+                Log.d(TAG, "setfavorite: ")
+              binding.favorite.visibility = View.GONE
+                binding.noFavorite.visibility = View.VISIBLE
 
+            }else{
+                binding.favorite.visibility = View.VISIBLE
+                binding.noFavorite.visibility = View.GONE
+            }
+        }
+    }
 
     private fun initData(){
         ProductService().getProductWithComments(productId, ProductWithCommentInsertCallback())
@@ -116,7 +139,6 @@ class MenuDetailFragment : Fragment(){
             )
 
             mainActivity.shppingListViewModel.addItem(shoppingCart)
-//            shoppingList.add(shoppingCart)
             Toast.makeText(context, "상품이 장바구니에 담겼습니다.", Toast.LENGTH_SHORT).show()
         }
         binding.btnCreateComment.setOnClickListener {
@@ -143,6 +165,23 @@ class MenuDetailFragment : Fragment(){
             }
 
             binding.textMenuCount.text = count.toString()
+        }
+
+        binding.noFavorite.setOnClickListener {
+            favoriteDto=FavoriteDto(product)
+            CoroutineScope(Dispatchers.IO).launch {
+                favoriteRepository.insertFavorite(favoriteDto)
+            }
+            binding.noFavorite.visibility=View.GONE
+            binding.favorite.visibility=View.VISIBLE
+
+        }
+        binding.favorite.setOnClickListener {
+            CoroutineScope(Dispatchers.IO).launch {
+                favoriteRepository.deleteFavorite(productId)
+            }
+            binding.noFavorite.visibility=View.VISIBLE
+            binding.favorite.visibility=View.GONE
         }
 
         commentAdapter.setBtnClickListener(object : CommentAdapter.CommentClickListener {

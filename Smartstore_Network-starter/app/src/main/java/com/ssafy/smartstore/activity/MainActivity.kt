@@ -118,6 +118,12 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
                         .commit()
                     true
                 }
+                R.id.navigation_page_4 -> {
+                    supportFragmentManager.beginTransaction()
+                        .replace(R.id.frame_layout_main, FavoriteFragment())
+                        .commit()
+                    true
+                }
                 else -> false
             }
         }
@@ -357,6 +363,8 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
 
         if (orderId > 0) {
             val orderList = OrderService().getOrderDetails(orderId)
+//        if (latestOrderId > 0) {
+//            val orderList = OrderService().getOrderDetails(latestOrderId)
 
             runOnUiThread {
                 orderList.observe(this, { orderDetails ->
