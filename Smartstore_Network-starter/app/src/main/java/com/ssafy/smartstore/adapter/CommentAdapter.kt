@@ -41,7 +41,6 @@ class CommentAdapter(var list:List<MenuDetailWithCommentResponse> ) :RecyclerVie
             ivModifyCancel.visibility = View.GONE
 
             if (data.userId != ApplicationClass.sharedPreferencesUtil.getUser().id) {
-                Log.d(TAG, "bindInfo : ${data.userId} / not me : ${data.commentContent}")
                 ivModify.visibility = View.GONE
                 ivDelete.visibility = View.GONE
             } else {

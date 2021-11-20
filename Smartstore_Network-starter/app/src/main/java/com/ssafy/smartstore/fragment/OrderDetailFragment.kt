@@ -15,8 +15,6 @@ import com.ssafy.smartstore.databinding.FragmentOrderDetailBinding
 import com.ssafy.smartstore.response.OrderDetailResponse
 import com.ssafy.smartstore.service.OrderService
 import com.ssafy.smartstore.util.CommonUtils
-import java.text.SimpleDateFormat
-import java.util.*
 
 // 주문상세화면, My탭  - 주문내역 선택시 팝업
 private const val TAG = "OrderDetailFragment_싸피"
