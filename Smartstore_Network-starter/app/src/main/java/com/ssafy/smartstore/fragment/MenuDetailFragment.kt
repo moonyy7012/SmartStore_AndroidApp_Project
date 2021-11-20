@@ -42,8 +42,6 @@ class MenuDetailFragment : Fragment(){
     private var commentAdapter = CommentAdapter(emptyList())
     private lateinit var product: Product
     private var productId = -1
-    private lateinit var favoriteDto: FavoriteDto
-
 
     private lateinit var binding:FragmentMenuDetailBinding
     private lateinit var favoriteRepository: FavoriteRepository
@@ -79,20 +77,13 @@ class MenuDetailFragment : Fragment(){
 
         initData()
         initListener()
-        setfavorite()
+        setFavorite()
     }
-    private fun setfavorite(){
+    private fun setFavorite() {
         favoriteRepository= FavoriteRepository.get()
         CoroutineScope(Dispatchers.IO).launch {
-            if(favoriteRepository.getFavorite(productId)==null){
-                Log.d(TAG, "setfavorite: ")
-              binding.favorite.visibility = View.GONE
-                binding.noFavorite.visibility = View.VISIBLE
-
-            }else{
-                binding.favorite.visibility = View.VISIBLE
-                binding.noFavorite.visibility = View.GONE
-            }
+            Log.d(TAG, "setFavorite: ${favoriteRepository.getFavorite(productId)}$")
+            binding.ivFavorite.isSelected = favoriteRepository.getFavorite(productId) != null
         }
     }
 
@@ -166,21 +157,23 @@ class MenuDetailFragment : Fragment(){
             binding.textMenuCount.text = count.toString()
         }
 
-        binding.noFavorite.setOnClickListener {
-            favoriteDto=FavoriteDto(product)
-            CoroutineScope(Dispatchers.IO).launch {
-                favoriteRepository.insertFavorite(favoriteDto)
+        binding.ivFavorite.setOnClickListener {
+            when(it.isSelected) {
+                true -> {
+                    CoroutineScope(Dispatchers.IO).launch {
+                        favoriteRepository.deleteFavorite(productId)
+                    }
+                    Toast.makeText(requireContext(), "즐겨찾기에서 삭제되었습니다.", Toast.LENGTH_SHORT).show()
+                }
+                else -> {
+                    val favoriteDto=FavoriteDto(product)
+                    CoroutineScope(Dispatchers.IO).launch {
+                        favoriteRepository.insertFavorite(favoriteDto)
+                    }
+                    Toast.makeText(requireContext(), "즐겨찾기에 등록되었습니다.", Toast.LENGTH_SHORT).show()
+                }
             }
-            binding.noFavorite.visibility=View.GONE
-            binding.favorite.visibility=View.VISIBLE
-
-        }
-        binding.favorite.setOnClickListener {
-            CoroutineScope(Dispatchers.IO).launch {
-                favoriteRepository.deleteFavorite(productId)
-            }
-            binding.noFavorite.visibility=View.VISIBLE
-            binding.favorite.visibility=View.GONE
+            it.isSelected = !it.isSelected
         }
 
         commentAdapter.setBtnClickListener(object : CommentAdapter.CommentClickListener {

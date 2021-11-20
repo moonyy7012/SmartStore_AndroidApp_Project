@@ -22,32 +22,23 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="20dp">
-        <TextView
-            android:id="@+id/txtMenuName"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="아메리카노"
-            android:textSize="40dp"
-            style="@style/Text.Title"
-            android:layout_marginBottom="0dp"
-            android:layout_marginEnd="160dp"
-            />
+
+            <TextView
+                android:id="@+id/txtMenuName"
+                style="@style/Text.Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="0dp"
+                android:layout_weight="1"
+                android:text="아메리카노"
+                android:textSize="40dp" />
 
             <ImageView
-                android:id="@+id/no_favorite"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:layout_marginTop="10dp"
-                android:src="@drawable/star"
-                android:visibility="visible" />
-
-            <ImageView
-                android:id="@+id/favorite"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:layout_marginTop="10dp"
-                android:src="@drawable/clicked_star"
-                android:visibility="gone" />
+                android:id="@+id/iv_favorite"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_gravity="center_vertical"
+                android:src="@drawable/selector_favorite" />
         </LinearLayout>
         <LinearLayout
             android:layout_width="match_parent"
