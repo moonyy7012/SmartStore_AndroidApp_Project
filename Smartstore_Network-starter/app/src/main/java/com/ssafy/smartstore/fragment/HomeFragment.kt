@@ -117,9 +117,8 @@ class HomeFragment : Fragment() {
     }
 
     private fun initUserName(){
-        var user = ApplicationClass.sharedPreferencesUtil.getUser()
+        val user = ApplicationClass.sharedPreferencesUtil.getUser()
         binding.textUserName.text = "${user.name} 님"
-
     }
 
 }

@@ -140,6 +140,7 @@ class ShoppingListFragment : Fragment(){
         )
         builder.setCancelable(true)
         builder.setPositiveButton("확인") { _, _ ->
+            mainActivity.tableN = "TakeOut"
             mainActivity.completedOrder()
         }
         builder.setNegativeButton("취소"

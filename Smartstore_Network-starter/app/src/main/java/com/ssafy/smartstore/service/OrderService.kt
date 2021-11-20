@@ -87,7 +87,7 @@ class OrderService{
         return responseLiveData
     }
 
-    fun addOrder(order:Order, callback: RetrofitCallback<Int>)  {
+    fun makeOrder(order:Order, callback: RetrofitCallback<Int>)  {
         RetrofitUtil.orderService.makeOrder(order).enqueue(object : Callback<Int> {
             override fun onResponse(call: Call<Int>, response: Response<Int>) {
                 val res = response.body()

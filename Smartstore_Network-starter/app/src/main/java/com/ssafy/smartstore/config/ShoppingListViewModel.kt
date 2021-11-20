@@ -15,6 +15,13 @@ class ShoppingListViewModel : ViewModel() {
         get() = _shoppingList
 
     fun addItem(item: ShoppingCart) {
+        for (listItem in _shoppingList.value!!) {
+            if (listItem.menuId == item.menuId) {
+                listItem.menuCnt += item.menuCnt
+                listItem.totalPrice += item.totalPrice
+                return
+            }
+        }
         _shoppingList.value!!.add(item)
     }
 

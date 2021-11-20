@@ -49,7 +49,7 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
     val shppingListViewModel: ShoppingListViewModel by lazy {
         ViewModelProvider(this)[ShoppingListViewModel::class.java]
     }
-    private var tableN = ""
+    var tableN = ""
     var orderId = -1
     var readable = false
     var isNear = false
@@ -425,30 +425,19 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
     }
 
     fun completedOrder() {
-        val orders = ArrayList<OrderDetail>()
-        var quantity = 0
-        var sum = 0
-
         shppingListViewModel.shoppingList.observe(this, { list ->
             Log.d(TAG, "completedOrder: $list")
-            for (item in list) {
-                orders.add(OrderDetail(item.menuId, item.menuCnt))
-                quantity += item.menuCnt
-                sum += item.totalPrice
-            }
 
             val order = Order().apply {
                 userId = ApplicationClass.sharedPreferencesUtil.getUser().id
                 orderTable = tableN
-                orderTime = CommonUtils.getFormattedString(System.currentTimeMillis())
-                details = orders
-                totalQuantity = quantity
-                totalPrice = sum
-                topProductName = list[0].menuName
-                topImg = list[0].menuImg
             }
 
-            OrderService().addOrder(order, OrderCallback())
+            for (item in list) {
+                order.details.add(OrderDetail(item.menuId, item.menuCnt))
+            }
+
+            OrderService().makeOrder(order, OrderCallback())
         })
     }
 
@@ -458,7 +447,11 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
             Toast.makeText(this@MainActivity, "주문이 완료되었습니다.", Toast.LENGTH_SHORT).show()
             readable = false
             shppingListViewModel.clearCart()
-            this@MainActivity.openFragment(6)
+            supportFragmentManager.apply {
+                beginTransaction().remove(ShoppingListFragment()).commit()
+                popBackStack()
+                beginTransaction().replace(R.id.frame_layout_main, MyPageFragment()).commit()
+            }
         }
 
         override fun onError(t: Throwable) {
