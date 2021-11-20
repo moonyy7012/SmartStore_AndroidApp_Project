@@ -17,7 +17,7 @@ import com.ssafy.smartstore.util.RetrofitCallback
 // 회원 가입 화면
 private const val TAG = "JoinFragment_싸피"
 class JoinFragment : Fragment(){
-    private var checkedId = true
+    private var checkedId = false
     lateinit var binding: FragmentJoinBinding
 
     override fun onCreateView(
@@ -60,22 +60,23 @@ class JoinFragment : Fragment(){
 
                 })
             }
+        }
 
-            // 회원가입 버튼
-            binding.btnJoin.setOnClickListener {
-                val joinId = binding.editTextJoinID.text.toString()
-                val joinPw = binding.editTextJoinPW.text.toString()
-                val joinName = binding.editTextJoinName.text.toString()
+        // 회원가입 버튼
+        binding.btnJoin.setOnClickListener {
+            Log.d(TAG, "btnJoin: ")
+            val joinId = binding.editTextJoinID.text.toString()
+            val joinPw = binding.editTextJoinPW.text.toString()
+            val joinName = binding.editTextJoinName.text.toString()
 
-                if (isNotVoid(joinId, joinPw, joinName)) {
-                    if (checkedId == false) {
-                        Toast.makeText(context, "아이디 중복을 검사하세요", Toast.LENGTH_SHORT).show()
-                    } else {
-                        join(joinId, joinPw, joinName)
-                    }
+            if (isNotVoid(joinId, joinPw, joinName)) {
+                if (checkedId == false) {
+                    Toast.makeText(context, "아이디 중복을 검사하세요", Toast.LENGTH_SHORT).show()
                 } else {
-                    Toast.makeText(context, "모든 정보를 기입하세요", Toast.LENGTH_SHORT).show()
+                    join(joinId, joinPw, joinName)
                 }
+            } else {
+                Toast.makeText(context, "모든 정보를 기입하세요", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -112,6 +113,8 @@ class JoinFragment : Fragment(){
 
     private fun isNotVoid(joinId: String, joinPw: String, joinName: String): Boolean {
         var result = true
+
+        Log.d(TAG, "isNotVoid: $joinId $joinPw $joinName")
 
         if (joinId == "") {
             changeView(false, binding.editTextJoinID)
