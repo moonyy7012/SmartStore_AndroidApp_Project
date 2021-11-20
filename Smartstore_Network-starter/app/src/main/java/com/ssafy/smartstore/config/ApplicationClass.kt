@@ -8,6 +8,7 @@ import com.ssafy.smartstore.dto.Notification
 import com.ssafy.smartstore.dto.ShoppingCart
 import com.ssafy.smartstore.intercepter.AddCookiesInterceptor
 import com.ssafy.smartstore.intercepter.ReceivedCookiesInterceptor
+import com.ssafy.smartstore.repository.FavoriteRepository
 import com.ssafy.smartstore.util.SharedPreferencesUtil
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -60,6 +61,8 @@ class ApplicationClass : Application() {
 
     override fun onCreate() {
         super.onCreate()
+
+        FavoriteRepository.initialize(this)
 
         //shared preference 초기화
         sharedPreferencesUtil = SharedPreferencesUtil(applicationContext)

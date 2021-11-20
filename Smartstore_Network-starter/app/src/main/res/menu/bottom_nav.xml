@@ -15,4 +15,9 @@
         android:enabled="true"
         android:title="Mypage"
         android:icon="@drawable/user"/>
+    <item
+        android:id="@+id/navigation_page_4"
+        android:enabled="true"
+        android:title="Favorite"
+        android:icon="@drawable/favorite"/>
 </menu>

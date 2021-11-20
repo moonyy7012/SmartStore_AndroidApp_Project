@@ -112,6 +112,12 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
                         .commit()
                     true
                 }
+                R.id.navigation_page_4 -> {
+                    supportFragmentManager.beginTransaction()
+                        .replace(R.id.frame_layout_main, FavoriteFragment())
+                        .commit()
+                    true
+                }
                 else -> false
             }
         }
