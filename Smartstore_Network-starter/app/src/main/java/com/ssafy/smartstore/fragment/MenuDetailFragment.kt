@@ -125,7 +125,7 @@ class MenuDetailFragment : Fragment(){
                 menuCnt,
                 product.price,
                 totalPrice,
-//                product.type
+                product.type
             )
 
             mainActivity.shppingListViewModel.addItem(shoppingCart)

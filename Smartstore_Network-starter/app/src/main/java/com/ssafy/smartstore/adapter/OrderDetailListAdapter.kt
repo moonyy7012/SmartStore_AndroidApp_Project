@@ -24,8 +24,8 @@ class OrderDetailListAdapter(val context: Context, val orderDetail:List<OrderDet
         val textShoppingMenuMoneyAll = itemView.findViewById<TextView>(R.id.textShoppingMenuMoneyAll)
 
         fun bindInfo(data:OrderDetailResponse){
-//            val type = if(data.productType == "coffee") "잔" else "개"
-            val type = if (data.productName.contains("coffee")) "잔" else "개"
+            val type = if(data.productType == "coffee" || data.productType == "tea") "잔" else "개"
+//            val type = if (data.productName.contains("coffee")) "잔" else "개"
 
             Glide.with(itemView)
                 .load("${ApplicationClass.MENU_IMGS_URL}${data.img}")
