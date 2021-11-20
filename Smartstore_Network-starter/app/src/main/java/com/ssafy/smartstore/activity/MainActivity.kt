@@ -46,11 +46,11 @@ import java.util.*
 private const val TAG = "MainActivity_싸피"
 class MainActivity : AppCompatActivity(), BeaconConsumer {
     private lateinit var bottomNavigation : BottomNavigationView
-    var orderId = -1
     val shppingListViewModel: ShoppingListViewModel by lazy {
         ViewModelProvider(this)[ShoppingListViewModel::class.java]
     }
     private var tableN = ""
+    var orderId = -1
     var readable = false
     var isNear = false
 
@@ -363,8 +363,7 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
 
         if (orderId > 0) {
             val orderList = OrderService().getOrderDetails(orderId)
-//        if (latestOrderId > 0) {
-//            val orderList = OrderService().getOrderDetails(latestOrderId)
+            orderId = -1    // 나중에 주문완료, pickUp 완성되면 그쪽으로 이동
 
             runOnUiThread {
                 orderList.observe(this, { orderDetails ->
@@ -455,6 +454,7 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
 
     inner class OrderCallback: RetrofitCallback<Int> {
         override fun onSuccess(code: Int, responseData: Int) {
+            orderId = responseData
             Toast.makeText(this@MainActivity, "주문이 완료되었습니다.", Toast.LENGTH_SHORT).show()
             readable = false
             shppingListViewModel.clearCart()

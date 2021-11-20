@@ -59,7 +59,6 @@ class OrderService{
         }
         val list = ArrayList<LatestOrderResponse>(hm.values)
         list.sortWith { o1, o2 -> o2.orderDate.compareTo(o1.orderDate) }
-//        if(!list.isEmpty()) latestOrderId=list[0].orderId
         return list
     }
 

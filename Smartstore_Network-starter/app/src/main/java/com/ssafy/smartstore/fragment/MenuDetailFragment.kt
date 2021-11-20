@@ -19,8 +19,7 @@ import com.ssafy.smartstore.R
 import com.ssafy.smartstore.activity.MainActivity
 import com.ssafy.smartstore.adapter.CommentAdapter
 import com.ssafy.smartstore.config.ApplicationClass
-//import com.ssafy.smartstore.config.ApplicationClass.Companion.shoppingList
-//import com.ssafy.smartstore.database.FavoriteDto
+import com.ssafy.smartstore.database.FavoriteDto
 import com.ssafy.smartstore.databinding.FragmentMenuDetailBinding
 import com.ssafy.smartstore.dto.Comment
 import com.ssafy.smartstore.dto.Product
@@ -43,7 +42,7 @@ class MenuDetailFragment : Fragment(){
     private var commentAdapter = CommentAdapter(emptyList())
     private lateinit var product: Product
     private var productId = -1
-    private lateinit var favoriteDto:FavoriteDto
+    private lateinit var favoriteDto: FavoriteDto
 
 
     private lateinit var binding:FragmentMenuDetailBinding

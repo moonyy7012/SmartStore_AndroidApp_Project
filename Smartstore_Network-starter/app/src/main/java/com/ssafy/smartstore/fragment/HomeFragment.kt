@@ -55,8 +55,6 @@ class HomeFragment : Fragment() {
 
     }
 
-
-
     private fun initAdapter() {
         if (noticeList.size == 0){
             noticeList.add(Notification(noticeIdx++,"싸피벅스에 오신 것을 환영합니다. ${ApplicationClass.sharedPreferencesUtil.getUser().name}님"))

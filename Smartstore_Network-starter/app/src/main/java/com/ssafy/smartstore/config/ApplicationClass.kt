@@ -2,12 +2,10 @@ package com.ssafy.smartstore.config
 
 import android.Manifest
 import android.app.Application
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import com.ssafy.smartstore.dto.Notification
-import com.ssafy.smartstore.dto.ShoppingCart
 import com.ssafy.smartstore.intercepter.AddCookiesInterceptor
 import com.ssafy.smartstore.intercepter.ReceivedCookiesInterceptor
+import com.ssafy.smartstore.repository.FavoriteRepository
 import com.ssafy.smartstore.util.SharedPreferencesUtil
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -51,6 +49,7 @@ class ApplicationClass : Application() {
     override fun onCreate() {
         super.onCreate()
 
+        // Room
         FavoriteRepository.initialize(this)
 
         //shared preference 초기화
