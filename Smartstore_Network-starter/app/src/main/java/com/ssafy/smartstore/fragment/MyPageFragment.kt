@@ -17,16 +17,14 @@ import com.ssafy.smartstore.activity.MainActivity
 import com.ssafy.smartstore.adapter.OrderAdapter
 import com.ssafy.smartstore.config.ApplicationClass
 import com.ssafy.smartstore.databinding.FragmentMypageBinding
-import com.ssafy.smartstore.dto.UserLevel
 import com.ssafy.smartstore.response.LatestOrderResponse
 import com.ssafy.smartstore.service.OrderService
 import com.ssafy.smartstore.service.UserService
 import com.ssafy.smartstore.util.RetrofitCallback
-import java.lang.Math.abs
 
 // MyPage 탭
 private const val TAG = "MypageFragment_싸피"
-class MypageFragment : Fragment(){
+class MyPageFragment : Fragment(){
     private lateinit var orderAdapter : OrderAdapter
     private lateinit var mainActivity: MainActivity
     private lateinit var list : List<LatestOrderResponse>
@@ -88,7 +86,7 @@ class MypageFragment : Fragment(){
     }
 
     private fun getUserData():String{
-        var user = ApplicationClass.sharedPreferencesUtil.getUser()
+        val user = ApplicationClass.sharedPreferencesUtil.getUser()
         binding.textUserName.text = user.name
 
         return user.id
@@ -106,7 +104,7 @@ class MypageFragment : Fragment(){
                 Gson().fromJson<HashMap<String, Any>>(json.toString(), java.util.HashMap::class.java)
             }
 
-            Glide.with(this@MypageFragment)
+            Glide.with(this@MyPageFragment)
                 .load("${ApplicationClass.GRADE_IMGS_URL}${grade["img"]}")
                 .error("R.drawable.${grade["img"]}")
                 .into(binding.imageLevel)

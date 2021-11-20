@@ -114,13 +114,13 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
                 }
                 R.id.navigation_page_3 -> {
                     supportFragmentManager.beginTransaction()
-                        .replace(R.id.frame_layout_main, MypageFragment())
+                        .replace(R.id.frame_layout_main, FavoriteFragment())
                         .commit()
                     true
                 }
                 R.id.navigation_page_4 -> {
                     supportFragmentManager.beginTransaction()
-                        .replace(R.id.frame_layout_main, FavoriteFragment())
+                        .replace(R.id.frame_layout_main, MyPageFragment())
                         .commit()
                     true
                 }
@@ -170,7 +170,7 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
             5 -> {
                 logout()
             }
-            6 -> transaction.replace(R.id.frame_layout_main, MypageFragment())
+            6 -> transaction.replace(R.id.frame_layout_main, MyPageFragment())
                 .addToBackStack(null)
         }
         transaction.commit()
