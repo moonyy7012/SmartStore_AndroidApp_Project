@@ -16,24 +16,20 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.maps.model.LatLng
 import com.ssafy.smartstore.activity.MainActivity
 import com.ssafy.smartstore.adapter.MenuAdapter
-import com.ssafy.smartstore.config.ApplicationClass
 import com.ssafy.smartstore.databinding.FragmentOrderBinding
 import com.ssafy.smartstore.dto.Product
-import com.ssafy.smartstore.dto.User
 import com.ssafy.smartstore.service.ProductService
 import com.ssafy.smartstore.util.RetrofitCallback
 import java.lang.Math.*
 import kotlin.math.pow
 import com.gun0912.tedpermission.PermissionListener
 import com.gun0912.tedpermission.TedPermission
-import com.ssafy.smartstore.config.ApplicationClass.Companion.locationOn
 
 
 // 하단 주문 탭
@@ -86,7 +82,7 @@ class OrderFragment : Fragment(){
 //        checkPermission()
 //        initView()
         distance = DistanceManager.getDistance(mylat, mylong, DEFAULT_LOCATION.latitude, DEFAULT_LOCATION.longitude)
-        if(!locationOn)
+        if(!mainActivity.checkLocationServicesStatus())
             binding.distanceInfo.setText("매장 위치 확인하기!")
         else if(mylat==0.1 && mylong==0.1)
             binding.distanceInfo.setText("매장까지의 거리를 파악하고 있습니다.. ")
@@ -155,9 +151,7 @@ class OrderFragment : Fragment(){
         menuAdapter.filterList(filteredList)
     }
     private fun initData(){
-
         ProductService().getProductList(ProductCallback())
-
     }
     private fun initView() {
         setLastLocation()
@@ -166,8 +160,9 @@ class OrderFragment : Fragment(){
 
     @SuppressLint("MissingPermission", "SetTextI18n")
     private fun setLastLocation() {
+        Log.d(TAG, "setLastLocation: ")
         //GPS, NETWORK, PASSIVE에서 가장 최근의 위치 정보 가져오기
-        var lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+        val lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
         if (lastKnownLocation != null) {
             mylat = lastKnownLocation.latitude
             mylong = lastKnownLocation.longitude
@@ -238,7 +233,8 @@ class OrderFragment : Fragment(){
     private val listener = object : LocationListener {
         //위치가 변경될때 호출될 method
         @SuppressLint("SetTextI18n")  //원래는 settext할 때 xml에 string 선언해야하는데 이것을 붙이면 노란 게 없어짐
-        override fun onLocationChanged(location: Location) {//location 변경될 때마다 이게 불림
+        override fun onLocationChanged(location: Location) { //location 변경될 때마다 이게 불림
+            Log.d(TAG, "onLocationChanged: ")
             when(location.provider) {
                 LocationManager.GPS_PROVIDER -> {
                     mylat = location.latitude
@@ -247,8 +243,6 @@ class OrderFragment : Fragment(){
                     binding.distanceInfo.setText("매장과의 거리가 ${distance}m 입니다. ")
                     Log.d("$TAG GPS : ", "${location.latitude}/${location.longitude}")
                 }
-
-
             }
         }
 
@@ -287,6 +281,4 @@ class OrderFragment : Fragment(){
             locationManager.removeUpdates(listener)
         }
     }
-
-
 }

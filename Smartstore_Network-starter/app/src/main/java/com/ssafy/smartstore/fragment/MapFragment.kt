@@ -18,7 +18,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
@@ -36,7 +35,6 @@ import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.ssafy.smartstore.activity.MainActivity
 import com.ssafy.smartstore.R
-import com.ssafy.smartstore.config.ApplicationClass.Companion.locationOn
 import com.ssafy.smartstore.fragment.OrderFragment.Companion.DEFAULT_LOCATION
 import java.util.*
 
@@ -68,22 +66,15 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     private val requestActivity: ActivityResultLauncher<Intent> = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult() // ◀ StartActivityForResult 처리를 담당
     ) {
-        // 사용자가 GPS 를 켰는지 검사함
-        if (checkLocationServicesStatus()) {
-            locationOn = true
-        }
         startLocationUpdates()
-
     }
 
     private val mapPermissionResult = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { result ->
-        if (!checkLocationServicesStatus()) {
+        if (!mainActivity.checkLocationServicesStatus()) {
             needRequest = true
             startLocationUpdates()
-
-
         }
     }
 
@@ -208,13 +199,9 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
     // 권한 확인 및 위치 정보 업데이트
     private fun startLocationUpdates() {
-
             if (checkMapPermission()) {
-
-                if (!checkLocationServicesStatus()) {
-
+                if (!mainActivity.checkLocationServicesStatus()) {
                     showDialogForLocationServiceSetting()
-
                 }
                 mFusedLocationClient?.requestLocationUpdates(  //
                     locationRequest,
@@ -227,20 +214,9 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
     }
 
-    // GPS 켜져있는지 확인
-    private fun checkLocationServicesStatus(): Boolean {
-        val locationManager =
-            (context as MainActivity).getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        return (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
-                || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER))
-        return true
-    }
-
     // 현재 위치 표시, 현재 위치로 카메라 이동
     fun setCurrentLocation(location: Location) {
-
         val currentLatLng = LatLng(location.latitude, location.longitude)
-
         val cameraUpdate = CameraUpdateFactory.newLatLng(currentLatLng)
         mMap!!.moveCamera(cameraUpdate)
 
@@ -248,8 +224,6 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
     // 초기 상가 위치 지정
     private fun setDefaultStoreLocation() {
-
-
         val location = Location("")
         location.latitude = DEFAULT_LOCATION.latitude
         location.longitude = DEFAULT_LOCATION.longitude

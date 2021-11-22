@@ -39,7 +39,6 @@ import com.ssafy.smartstore.*
 import com.ssafy.smartstore.R
 import com.ssafy.smartstore.adapter.OrderDetailListAdapter
 import com.ssafy.smartstore.config.ApplicationClass
-import com.ssafy.smartstore.config.ApplicationClass.Companion.locationOn
 import com.ssafy.smartstore.config.ShoppingListViewModel
 import com.ssafy.smartstore.dto.Order
 import com.ssafy.smartstore.dto.OrderDetail
@@ -98,9 +97,7 @@ class MainActivity : AppCompatActivity(), BeaconConsumer{
         ActivityResultContracts.StartActivityForResult() // ◀ StartActivityForResult 처리를 담당
     ) {
         // 사용자가 GPS 를 켰는지 검사함
-        if (checkLocationServicesStatus()) {
-            locationOn=true
-        }else{
+        if (checkLocationServicesStatus() == false) {
             Log.d(TAG, "dialog: ")
             showDialogForLocationServiceSetting()
         }
