@@ -16,12 +16,10 @@
         android:textSize="30dp"
         android:textColor="@color/coffee_point_red"
         style="@style/Text.Title"/>
-    <ImageView
-        android:id="@+id/map"
+
+    <com.google.android.gms.maps.MapView
+        android:id="@+id/mapView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scaleType="centerCrop"
-        android:src="@drawable/map_real"/>
-
-
+        />
 </LinearLayout>

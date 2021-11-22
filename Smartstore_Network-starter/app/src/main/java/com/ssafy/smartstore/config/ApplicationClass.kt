@@ -17,8 +17,8 @@ class ApplicationClass : Application() {
     companion object{
         // ipconfig를 통해 ip확인하기
         // 핸드폰으로 접속은 같은 인터넷으로 연결 되어있어야함 (유,무선)
-//        const val SERVER_URL = "http://192.168.35.165:9999/"
-        const val SERVER_URL = "http://172.30.1.20:9999/"
+        const val SERVER_URL = "http://192.168.35.208:9999/"
+//        const val SERVER_URL = "http://172.30.1.20:9999/"
         const val MENU_IMGS_URL = "${SERVER_URL}imgs/menu/"
         const val GRADE_IMGS_URL = "${SERVER_URL}imgs/grade/"
         const val IMGS_URL = "${SERVER_URL}imgs/"
@@ -43,6 +43,8 @@ class ApplicationClass : Application() {
         // 주문 준비 완료 확인 시간 1분
         const val ORDER_COMPLETED_TIME = 60*1000
 
+        //위치 서비스 켰는지 여부
+        var locationOn = false
     }
 
 
