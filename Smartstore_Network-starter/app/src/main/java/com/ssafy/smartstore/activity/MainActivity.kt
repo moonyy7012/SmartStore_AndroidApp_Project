@@ -17,7 +17,6 @@ import android.nfc.NfcAdapter
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Looper
 import android.os.RemoteException
 import android.provider.Settings
 import android.util.Log
@@ -27,9 +26,7 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -37,19 +34,16 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.LocationSettingsRequest
-import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.ssafy.smartstore.*
 import com.ssafy.smartstore.R
 import com.ssafy.smartstore.adapter.OrderDetailListAdapter
 import com.ssafy.smartstore.config.ApplicationClass
-import com.ssafy.smartstore.config.ApplicationClass.Companion.locationOn
 import com.ssafy.smartstore.config.ShoppingListViewModel
 import com.ssafy.smartstore.dto.Order
 import com.ssafy.smartstore.dto.OrderDetail
 import com.ssafy.smartstore.fragment.*
 import com.ssafy.smartstore.service.OrderService
-import com.ssafy.smartstore.util.CommonUtils
 import com.ssafy.smartstore.util.RetrofitCallback
 import org.altbeacon.beacon.*
 import java.util.*
