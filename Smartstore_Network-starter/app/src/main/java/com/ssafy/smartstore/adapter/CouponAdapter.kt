@@ -10,7 +10,9 @@ import com.ssafy.smartstore.R
 import com.ssafy.smartstore.dto.Coupon
 import com.ssafy.smartstore.util.CommonUtils
 
-class CouponAdapter(var list: MutableList<Coupon>, var choice: Int) : RecyclerView.Adapter<CouponAdapter.CouponHolder>() {
+class CouponAdapter(var list: List<Coupon>) : RecyclerView.Adapter<CouponAdapter.CouponHolder>() {
+    var selected = 1
+
     inner class CouponHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val tvCouponName = itemView.findViewById<TextView>(R.id.tv_coupon_name)
         private val tvValidDate = itemView.findViewById<TextView>(R.id.tv_valid_date)
@@ -21,7 +23,7 @@ class CouponAdapter(var list: MutableList<Coupon>, var choice: Int) : RecyclerVi
         fun bindInfo(coupon: Coupon) {
             tvCouponName.text = coupon.name
             tvValidDate.text = "${CommonUtils.getFormattedStringByDate(coupon.validate)}까지"
-            if (choice == 1) {  // 사용 가능한 쿠폰
+            if (selected == 1) {  // 사용 가능한 쿠폰
                 tvDivider.visibility = View.GONE
                 tvUsedDate.visibility = View.GONE
                 btnGoUse.visibility = View.VISIBLE

@@ -9,9 +9,9 @@ import retrofit2.Response
 
 class CouponService {
 
-    fun getCouponList(userId: String, callback: RetrofitCallback<MutableList<Coupon>>) {
-        RetrofitUtil.couponService.getCouponsByUser(userId).enqueue(object : Callback<MutableList<Coupon>> {
-            override fun onResponse(call: Call<MutableList<Coupon>>, response: Response<MutableList<Coupon>>) {
+    fun getCouponList(userId: String, callback: RetrofitCallback<List<Coupon>>) {
+        RetrofitUtil.couponService.getCouponsByUser(userId).enqueue(object : Callback<List<Coupon>> {
+            override fun onResponse(call: Call<List<Coupon>>, response: Response<List<Coupon>>) {
                 val res = response.body()
                 if(response.code() == 200){
                     if (res != null) {
@@ -22,15 +22,15 @@ class CouponService {
                 }
             }
 
-            override fun onFailure(call: Call<MutableList<Coupon>>, t: Throwable) {
+            override fun onFailure(call: Call<List<Coupon>>, t: Throwable) {
                 callback.onError(t)
             }
         })
     }
 
-    fun getCouponHistory(userId: String, callback: RetrofitCallback<MutableList<Coupon>>) {
-        RetrofitUtil.couponService.getUsedCouponsByUser(userId).enqueue(object : Callback<MutableList<Coupon>> {
-            override fun onResponse(call: Call<MutableList<Coupon>>, response: Response<MutableList<Coupon>>) {
+    fun getCouponHistory(userId: String, callback: RetrofitCallback<List<Coupon>>) {
+        RetrofitUtil.couponService.getUsedCouponsByUser(userId).enqueue(object : Callback<List<Coupon>> {
+            override fun onResponse(call: Call<List<Coupon>>, response: Response<List<Coupon>>) {
                 val res = response.body()
                 if(response.code() == 200){
                     if (res != null) {
@@ -41,7 +41,7 @@ class CouponService {
                 }
             }
 
-            override fun onFailure(call: Call<MutableList<Coupon>>, t: Throwable) {
+            override fun onFailure(call: Call<List<Coupon>>, t: Throwable) {
                 callback.onError(t)
             }
         })

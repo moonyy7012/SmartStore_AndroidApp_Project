@@ -7,8 +7,8 @@ import retrofit2.http.Path
 
 interface CouponApi {
     @GET("rest/coupon/{userId}")
-    fun getCouponsByUser(@Path("userId") userId: String): Call<MutableList<Coupon>>
+    fun getCouponsByUser(@Path("userId") userId: String): Call<List<Coupon>>
 
     @GET("rest/coupon/used/{userId}")
-    fun getUsedCouponsByUser(@Path("userId") userId: String): Call<MutableList<Coupon>>
+    fun getUsedCouponsByUser(@Path("userId") userId: String): Call<List<Coupon>>
 }
