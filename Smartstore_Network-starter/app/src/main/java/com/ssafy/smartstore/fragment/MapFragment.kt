@@ -36,6 +36,7 @@ import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.ssafy.smartstore.activity.MainActivity
 import com.ssafy.smartstore.R
+import com.ssafy.smartstore.config.ApplicationClass.Companion.locationOn
 import com.ssafy.smartstore.fragment.OrderFragment.Companion.DEFAULT_LOCATION
 import java.util.*
 
@@ -54,7 +55,6 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     // 사진 테스트 위한 임의 위치
     private lateinit var currentPosition: LatLng
 
-    private var firstRendering: Boolean = true
     private lateinit var mapView: MapView
     private var needRequest = false
 
@@ -70,15 +70,19 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     ) {
         // 사용자가 GPS 를 켰는지 검사함
         if (checkLocationServicesStatus()) {
-            startLocationUpdates()
+            locationOn = true
         }
+        startLocationUpdates()
+
     }
 
     private val mapPermissionResult = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { result ->
-        if (checkLocationServicesStatus()) {
+        if (!checkLocationServicesStatus()) {
             needRequest = true
+            startLocationUpdates()
+
 
         }
     }
@@ -139,6 +143,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                     }
                 val alertDialog = builder.create()
                 alertDialog.show()
+
             } else {
                 // 4-1. 사용자가 퍼미션 거부를 한 적이 없는 경우에는 권한 요청
                 mapPermissionResult.launch(requiredMapPermission[0])
@@ -157,8 +162,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                         Intent.ACTION_VIEW, Uri.parse(
                             "https://www.google.com/maps/dir/?api=1&origin=${getAddress(mCurrentLocation.latitude,mCurrentLocation.longitude)}&destination=${getAddress(
                                 DEFAULT_LOCATION.latitude, DEFAULT_LOCATION.longitude)}&mode=r&z=15"
-//                            "https://www.google.com/maps/dir/${mCurrentLocation.latitude}${mCurrentLocation.longitude}/${DEFAULT_LOCATION.latitude},${DEFAULT_LOCATION.longitude}"
-                            //https://www.google.com/maps/dir/35.8291183,128.63413/37.5868711,126.974811/@36.7032357,126.6382932,8z/data=!3m1!4b1
+
                         )
                     )
                     intent.setPackage("com.google.android.apps.maps")
@@ -205,10 +209,13 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     // 권한 확인 및 위치 정보 업데이트
     private fun startLocationUpdates() {
 
-        if (!checkLocationServicesStatus()) {
-            showDialogForLocationServiceSetting()
-        } else {
             if (checkMapPermission()) {
+
+                if (!checkLocationServicesStatus()) {
+
+                    showDialogForLocationServiceSetting()
+
+                }
                 mFusedLocationClient?.requestLocationUpdates(  //
                     locationRequest,
                     locationCallback,
@@ -217,7 +224,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                 if (mMap != null) mMap!!.isMyLocationEnabled = true
                 if (mMap != null) mMap!!.uiSettings.isZoomControlsEnabled = true
             }
-        }
+
     }
 
     // GPS 켜져있는지 확인
@@ -337,7 +344,6 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         mMap?.setOnMarkerClickListener {
-            Toast.makeText(context,"클릭", Toast.LENGTH_SHORT).show()
 
             showDialogStore()
             false

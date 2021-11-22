@@ -83,7 +83,8 @@ class OrderFragment : Fragment(){
         super.onViewCreated(view, savedInstanceState)
 
         initData()
-        checkPermission()
+//        checkPermission()
+//        initView()
         distance = DistanceManager.getDistance(mylat, mylong, DEFAULT_LOCATION.latitude, DEFAULT_LOCATION.longitude)
         if(!locationOn)
             binding.distanceInfo.setText("매장 위치 확인하기!")
@@ -125,12 +126,12 @@ class OrderFragment : Fragment(){
             }
             // 권한 얻기에 실패했을 때 동작 처리
             override fun onPermissionDenied(deniedPermissions: MutableList<String>?) {
-                Toast.makeText(context, "위치 권한이 거부되었습니다.", Toast.LENGTH_SHORT).show()
+//                Toast.makeText(context, "위치 권한이 거부되었습니다.", Toast.LENGTH_SHORT).show()
             }
         }
         TedPermission.with(context)
             .setPermissionListener(permissionListener)
-            .setDeniedMessage("[설정] 에서 위치 접근 권한을 부여해야만 사용이 가능합니다.")
+//            .setDeniedMessage("[설정] 에서 위치 접근 권한을 부여해야만 사용이 가능합니다.")
             // 필요한 권한 설정
             .setPermissions(
                 ACCESS_FINE_LOCATION,
