@@ -21,6 +21,12 @@ public class UserCoupon {
         this.useTime = useTime;
     }
 
+    public UserCoupon(String userId, Integer couponId, Date validate) {
+        this.userId = userId;
+        this.couponId = couponId;
+        this.validate = validate;
+    }
+
     public UserCoupon() {
 
     }
