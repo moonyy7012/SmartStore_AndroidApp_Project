@@ -54,5 +54,4 @@ class SharedPreferencesUtil (context: Context) {
         preferences.edit().remove(COOKIES_KEY_NAME).apply()
     }
 
-
 }

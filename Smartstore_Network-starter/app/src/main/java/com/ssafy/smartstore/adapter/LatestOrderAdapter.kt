@@ -16,20 +16,15 @@ import com.ssafy.smartstore.util.CommonUtils
 
 class LatestOrderAdapter(val context: Context, val list: List<LatestOrderResponse>) :RecyclerView.Adapter<LatestOrderAdapter.LatestOrderHolder>(){
 
-
-
     inner class LatestOrderHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
 
         val menuImage = itemView.findViewById<ImageView>(R.id.menuImage)
         val textMenuNames = itemView.findViewById<TextView>(R.id.textMenuNames)
         val textMenuPrice = itemView.findViewById<TextView>(R.id.textMenuPrice)
         val textMenuDate = itemView.findViewById<TextView>(R.id.textMenuDate)
-        val textCompleted = itemView.findViewById<ImageView>(R.id.btnGoOrder)
+        val ivReOrder = itemView.findViewById<ImageView>(R.id.btnGoOrder)
 
         fun bindInfo(data: LatestOrderResponse){
-//            var img = context.resources.getIdentifier(data.img, "drawable", context.packageName)
-//            menuImage.setImageResource(img)
-
             Glide.with(itemView)
                 .load("${ApplicationClass.MENU_IMGS_URL}${data.img}")
                 .into(menuImage)
@@ -42,13 +37,7 @@ class LatestOrderAdapter(val context: Context, val list: List<LatestOrderRespons
             }
 
             textMenuPrice.text = CommonUtils.makeComma(data.totalPrice)
-            textMenuDate.text = data.orderDate.toString()
-
-            // 클릭이벤트
-            itemView.setOnClickListener {
-                itemClickListner.onClick(it, layoutPosition, data.orderId)
-            }
-
+            textMenuDate.text = CommonUtils.getFormattedString(data.orderDate)
         }
     }
 
@@ -61,6 +50,7 @@ class LatestOrderAdapter(val context: Context, val list: List<LatestOrderRespons
 
         holder.apply {
             bindInfo(list[position])
+            ivReOrder.setOnClickListener { itemClickListener.onClick(itemView, layoutPosition, list[position].orderId) }
         }
     }
 
@@ -72,11 +62,11 @@ class LatestOrderAdapter(val context: Context, val list: List<LatestOrderRespons
     }
 
     //클릭리스너 선언
-    private lateinit var itemClickListner: ItemClickListener
+    private lateinit var itemClickListener: ItemClickListener
 
     //클릭리스너 등록 매소드
     fun setItemClickListener(itemClickListener: ItemClickListener) {
-        this.itemClickListner = itemClickListener
+        this.itemClickListener = itemClickListener
     }
 
 }

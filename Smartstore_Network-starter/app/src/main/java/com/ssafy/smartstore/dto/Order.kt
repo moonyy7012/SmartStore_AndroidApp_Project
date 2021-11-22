@@ -8,12 +8,12 @@ data class Order (
     var orderTable: String,
     var orderTime: String,
     var complited: String,
-    val details: ArrayList<OrderDetail> = ArrayList() ){
+    var details: ArrayList<OrderDetail> = ArrayList() ){
 
-    var totalQnanty:Int = 0
+    var totalQuantity:Int = 0
     var totalPrice:Int = 0
     var topProductName:String = ""
     var topImg:String = ""
 
-//    constructor(userId:Int,orderTable: String,orderTime: String,complited: String,details:ArrayList<OrderDetail>):this(0,"","","","",null)
+    constructor():this(0,"","","","")
 }

@@ -7,20 +7,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.LiveData
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ssafy.smartstore.activity.MainActivity
 import com.ssafy.smartstore.adapter.OrderDetailListAdapter
-import com.ssafy.smartstore.config.ApplicationClass
 import com.ssafy.smartstore.databinding.FragmentOrderDetailBinding
-import com.ssafy.smartstore.dto.Order
-import com.ssafy.smartstore.dto.OrderDetail
 import com.ssafy.smartstore.response.OrderDetailResponse
 import com.ssafy.smartstore.service.OrderService
 import com.ssafy.smartstore.util.CommonUtils
-import java.text.SimpleDateFormat
-import java.util.*
 
 // 주문상세화면, My탭  - 주문내역 선택시 팝업
 private const val TAG = "OrderDetailFragment_싸피"
@@ -89,14 +83,11 @@ class OrderDetailFragment : Fragment(){
 
     // OrderDetail 페이지 화면 구성
     private fun setOrderDetailScreen(orderDetails: List<OrderDetailResponse>){
-        val dateFormat = SimpleDateFormat("yyyy.MM.dd HH시 mm분 ss초")
-        dateFormat.timeZone = TimeZone.getTimeZone("UTC")
-
         binding.tvOrderStatus.text = CommonUtils.isOrderCompleted(orderDetails[0])
-        binding.tvOrderDate.text = dateFormat.format(orderDetails[0].orderDate)
+        binding.tvOrderDate.text = CommonUtils.getFormattedString(orderDetails[0].orderDate)
         var totalPrice = 0
         orderDetails.forEach { totalPrice += it.totalPrice }
-        binding.tvTotalPrice.text = "$totalPrice 원"
+        binding.tvTotalPrice.text = CommonUtils.makeComma(totalPrice)
     }
 
 

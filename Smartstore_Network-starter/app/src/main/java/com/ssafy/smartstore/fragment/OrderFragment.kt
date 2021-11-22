@@ -2,6 +2,8 @@ package com.ssafy.smartstore.fragment
 
 import android.content.Context
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -25,6 +27,7 @@ class OrderFragment : Fragment(){
     private lateinit var menuAdapter: MenuAdapter
     private lateinit var mainActivity: MainActivity
     private lateinit var prodList:List<Product>
+    private lateinit var filteredList:MutableList<Product>
     private lateinit var binding:FragmentOrderBinding
 
     override fun onAttach(context: Context) {
@@ -54,8 +57,37 @@ class OrderFragment : Fragment(){
         binding.btnMap.setOnClickListener{
             mainActivity.openFragment(4)
         }
+
+        binding.searchMenu.addTextChangedListener(object: TextWatcher{
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                var searchText = binding.searchMenu.text.toString()
+                searchFilter(searchText)
+            }
+
+        })
+
+
     }
 
+    private fun searchFilter(searchText:String?){
+        filteredList= mutableListOf()
+
+        for (i in 0 until prodList.size) {
+            if (prodList.get(i).name.toLowerCase()
+                    .contains(searchText!!.toLowerCase())
+            ) {
+                filteredList.add(prodList.get(i))
+            }
+        }
+
+        menuAdapter.filterList(filteredList)
+    }
     private fun initData(){
 
         ProductService().getProductList(ProductCallback())
@@ -66,6 +98,7 @@ class OrderFragment : Fragment(){
         override fun onSuccess( code: Int, productList: List<Product>) {
             productList.let {
                 Log.d(TAG, "onSuccess: ${productList}")
+                prodList=productList
                 menuAdapter = MenuAdapter(productList)
                 menuAdapter.setItemClickListener(object : MenuAdapter.ItemClickListener{
                     override fun onClick(view: View, position: Int, productId:Int) {
