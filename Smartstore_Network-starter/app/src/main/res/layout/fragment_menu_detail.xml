@@ -12,19 +12,34 @@
         android:layout_height="150dp"
         android:scaleType="fitCenter"
         android:src="@drawable/coffee1" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="20dp"
         android:orientation="vertical">
-        <TextView
-            android:id="@+id/txtMenuName"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="아메리카노"
-            android:textSize="40dp"
-            style="@style/Text.Title"
-            android:layout_marginBottom="30dp"/>
+            android:layout_marginBottom="20dp">
+
+            <TextView
+                android:id="@+id/txtMenuName"
+                style="@style/Text.Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="0dp"
+                android:layout_weight="1"
+                android:text="아메리카노"
+                android:textSize="40dp" />
+
+            <ImageView
+                android:id="@+id/iv_favorite"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_gravity="center_vertical"
+                android:src="@drawable/selector_favorite" />
+        </LinearLayout>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -68,7 +83,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="10dp"
-                android:text="0"
+                android:text="1"
                 android:textSize="30dp" />
 
             <ImageButton
@@ -117,7 +132,7 @@
         android:layout_marginHorizontal="5dp">
 
         <EditText
-            android:id="@+id/etComment"
+            android:id="@+id/inputComment"
             style="@style/Text.Title"
             android:layout_width="wrap_content"
             android:layout_height="40dp"

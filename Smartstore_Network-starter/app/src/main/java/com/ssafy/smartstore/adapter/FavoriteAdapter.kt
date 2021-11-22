@@ -9,23 +9,23 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.ssafy.smartstore.R
 import com.ssafy.smartstore.config.ApplicationClass
-import com.ssafy.smartstore.dto.Product
+import com.ssafy.smartstore.database.FavoriteDto
 
-private const val TAG = "MenuAdapter_싸피"
-class MenuAdapter(var productList:List<Product>) :RecyclerView.Adapter<MenuAdapter.MenuHolder>(){
+private const val TAG = "FavoriteAdapter_싸피"
+class FavoriteAdapter(var favoriteList:List<FavoriteDto>) :RecyclerView.Adapter<FavoriteAdapter.MenuHolder>(){
 
     inner class MenuHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
         val menuName = itemView.findViewById<TextView>(R.id.textMenuNames)
         val menuImage = itemView.findViewById<ImageView>(R.id.menuImage)
 
-        fun bindInfo(product : Product){
-            menuName.text = product.name
+        fun bindInfo(favoriteDto: FavoriteDto){
+            menuName.text = favoriteDto.name
             Glide.with(itemView)
-                .load("${ApplicationClass.MENU_IMGS_URL}${product.img}")
+                .load("${ApplicationClass.MENU_IMGS_URL}${favoriteDto.img}")
                 .into(menuImage)
 
             itemView.setOnClickListener{
-                itemClickListener.onClick(it, layoutPosition, productList[layoutPosition].id)
+                itemClickListener.onClick(it, layoutPosition, favoriteList[layoutPosition].productId)
             }
         }
     }
@@ -37,18 +37,14 @@ class MenuAdapter(var productList:List<Product>) :RecyclerView.Adapter<MenuAdapt
 
     override fun onBindViewHolder(holder: MenuHolder, position: Int) {
         holder.apply{
-            bindInfo(productList[position])
+            bindInfo(favoriteList[position])
         }
     }
 
     override fun getItemCount(): Int {
-        return productList.size
+        return favoriteList.size
     }
 
-    fun filterList(filteredList: List<Product>) {
-        productList = filteredList
-        notifyDataSetChanged()
-    }
 
     //클릭 인터페이스 정의 사용하는 곳에서 만들어준다.
     interface ItemClickListener {
@@ -60,5 +56,6 @@ class MenuAdapter(var productList:List<Product>) :RecyclerView.Adapter<MenuAdapt
     fun setItemClickListener(itemClickListener: ItemClickListener) {
         this.itemClickListener = itemClickListener
     }
+
 }
 

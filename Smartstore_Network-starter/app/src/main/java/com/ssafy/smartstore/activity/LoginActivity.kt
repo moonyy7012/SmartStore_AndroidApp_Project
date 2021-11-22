@@ -1,9 +1,6 @@
 package com.ssafy.smartstore.activity
 
-import android.app.PendingIntent
 import android.content.Intent
-import android.content.IntentFilter
-import android.nfc.NfcAdapter
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import com.ssafy.smartstore.fragment.JoinFragment
@@ -14,20 +11,10 @@ import com.ssafy.smartstore.config.ApplicationClass.Companion.sharedPreferencesU
 private const val TAG = "LoginActivity_싸피"
 class LoginActivity : AppCompatActivity() {
 
-    // NFC 관련
-    var nfcAdapter:NfcAdapter? = null
-    var pIntent: PendingIntent? = null
-    lateinit var filters: Array<IntentFilter>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
-
-        // NFC
-        nfcAdapter = NfcAdapter.getDefaultAdapter(this)
-        if (nfcAdapter == null) {
-            finish() // null이면 nfc를 지원하지 않기 때문에 finish() 해주는 것...
-        }
 
         //로그인 된 상태인지 확인
         var user = sharedPreferencesUtil.getUser()

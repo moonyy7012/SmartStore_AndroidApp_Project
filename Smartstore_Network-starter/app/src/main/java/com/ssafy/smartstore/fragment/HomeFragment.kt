@@ -1,52 +1,30 @@
 package com.ssafy.smartstore.fragment
 
-import android.Manifest
-import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothManager
 import android.content.Context
-import android.content.Context.BLUETOOTH_SERVICE
-import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Bundle
-import android.os.RemoteException
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.ssafy.smartstore.activity.MainActivity
 import com.ssafy.smartstore.adapter.LatestOrderAdapter
 import com.ssafy.smartstore.adapter.NoticeAdapter
 import com.ssafy.smartstore.config.ApplicationClass
-import com.ssafy.smartstore.config.ApplicationClass.Companion.notiIdx
-import com.ssafy.smartstore.config.ApplicationClass.Companion.notiList
+import com.ssafy.smartstore.config.ApplicationClass.Companion.noticeIdx
+import com.ssafy.smartstore.config.ApplicationClass.Companion.noticeList
 import com.ssafy.smartstore.databinding.FragmentHomeBinding
 import com.ssafy.smartstore.dto.Notification
 import com.ssafy.smartstore.dto.ShoppingCart
-import com.ssafy.smartstore.dto.UserOrderDetail
 import com.ssafy.smartstore.response.LatestOrderResponse
-import com.ssafy.smartstore.response.OrderDetailResponse
 import com.ssafy.smartstore.service.OrderService
-import com.ssafy.smartstore.service.UserService
-import com.ssafy.smartstore.util.RetrofitCallback
-import org.altbeacon.beacon.*
 
 private const val TAG = " HomeFrag_싸피"
 // Home 탭
 class HomeFragment : Fragment() {
     // 최근주문 데이터가 있는 userData
-    private var userData: HashMap<String,Any> = HashMap<String,Any>()
-
     private lateinit var latestOrderAdapter : LatestOrderAdapter
     private lateinit var noticeAdapter: NoticeAdapter
     private lateinit var mainActivity: MainActivity
@@ -77,15 +55,13 @@ class HomeFragment : Fragment() {
 
     }
 
-
-
-    fun initAdapter() {
-        if (notiList.size == 0){
-            notiList.add(Notification(notiIdx++,"싸피벅스에 오신 것을 환영합니다. ${ApplicationClass.sharedPreferencesUtil.getUser().name}님"))
+    private fun initAdapter() {
+        if (noticeList.size == 0){
+            noticeList.add(Notification(noticeIdx++,"싸피벅스에 오신 것을 환영합니다. ${ApplicationClass.sharedPreferencesUtil.getUser().name}님"))
         }
 
         noticeAdapter = NoticeAdapter()
-        noticeAdapter.setList(notiList)
+        noticeAdapter.setList(noticeList)
 
         binding.recyclerViewNoticeOrder.apply {
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
@@ -97,47 +73,52 @@ class HomeFragment : Fragment() {
 
         noticeAdapter.onItemClickListener = object : NoticeAdapter.OnItemClickListener {
             override fun onClick(view: View, position: Int) {
-                notiList.removeAt(position)
-                noticeAdapter.setList(notiList)
+                noticeList.removeAt(position)
+                noticeAdapter.setList(noticeList)
                 noticeAdapter.notifyDataSetChanged()
             }
 
         }
 
         val userLastOrderLiveData = OrderService().getLastMonthOrder(ApplicationClass.sharedPreferencesUtil.getUser().id)
-        userLastOrderLiveData.observe(
-            viewLifecycleOwner,
-            {
-                latestList = it
+        userLastOrderLiveData.observe(viewLifecycleOwner, {
+            latestList = it
 
-                latestOrderAdapter = LatestOrderAdapter(mainActivity, latestList)
-                latestOrderAdapter.setItemClickListener(object : LatestOrderAdapter.ItemClickListener {
-                    override fun onClick(view: View, position: Int, orderId: Int) {
-                        Log.d(TAG, "onClick: $orderId")
-                        ApplicationClass.latestMode = 1
-                        var data = OrderService().getOrderDetails(orderId)
-                        Thread.sleep(200L)
-
-                        mainActivity.openFragment(1,"orderId",orderId)
-
-                    }
-                })
-                binding.recyclerViewLatestOrder.apply {
-                    layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
-                    adapter = latestOrderAdapter
-                    //원래의 목록위치로 돌아오게함
-                    adapter!!.stateRestorationPolicy =
-                        RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
+            latestOrderAdapter = LatestOrderAdapter(mainActivity, latestList)
+            latestOrderAdapter.setItemClickListener(object : LatestOrderAdapter.ItemClickListener {
+                override fun onClick(view: View, position: Int, orderId: Int) {
+                    Log.d(TAG, "onClick: $orderId")
+                    OrderService().getOrderDetails(orderId).observe(viewLifecycleOwner, { list ->
+                        for (item in list) {
+                            val shoppingCart = ShoppingCart(
+                                item.productId,
+                                item.img,
+                                item.productName,
+                                item.quantity,
+                                item.unitPrice,
+                                item.totalPrice,
+                                item.productType
+                            )
+                            mainActivity.shppingListViewModel.addItem(shoppingCart)
+                        }
+                        mainActivity.openFragment(1)
+                    })
                 }
+            })
+            binding.recyclerViewLatestOrder.apply {
+                layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+                adapter = latestOrderAdapter
+                //원래의 목록위치로 돌아오게함
+                adapter!!.stateRestorationPolicy =
+                    RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
             }
-        )
+        })
 
     }
 
     private fun initUserName(){
-        var user = ApplicationClass.sharedPreferencesUtil.getUser()
+        val user = ApplicationClass.sharedPreferencesUtil.getUser()
         binding.textUserName.text = "${user.name} 님"
-
     }
 
 }
