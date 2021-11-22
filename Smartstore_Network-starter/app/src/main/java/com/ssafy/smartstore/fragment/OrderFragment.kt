@@ -1,6 +1,5 @@
 package com.ssafy.smartstore.fragment
 
-import android.Manifest
 import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.annotation.SuppressLint
 import android.content.Context
@@ -28,8 +27,7 @@ import com.ssafy.smartstore.service.ProductService
 import com.ssafy.smartstore.util.RetrofitCallback
 import java.lang.Math.*
 import kotlin.math.pow
-import com.gun0912.tedpermission.PermissionListener
-import com.gun0912.tedpermission.TedPermission
+
 
 
 // 하단 주문 탭
@@ -79,8 +77,7 @@ class OrderFragment : Fragment(){
         super.onViewCreated(view, savedInstanceState)
 
         initData()
-//        checkPermission()
-//        initView()
+
         distance = DistanceManager.getDistance(mylat, mylong, DEFAULT_LOCATION.latitude, DEFAULT_LOCATION.longitude)
         if(!mainActivity.checkLocationServicesStatus())
             binding.distanceInfo.setText("매장 위치 확인하기!")
@@ -114,27 +111,7 @@ class OrderFragment : Fragment(){
 
 
     }
-    fun checkPermission() {
-        val permissionListener = object : PermissionListener {
-            // 권한 얻기에 성공했을 때 동작 처리
-            override fun onPermissionGranted() {
-                initView()
-            }
-            // 권한 얻기에 실패했을 때 동작 처리
-            override fun onPermissionDenied(deniedPermissions: MutableList<String>?) {
-//                Toast.makeText(context, "위치 권한이 거부되었습니다.", Toast.LENGTH_SHORT).show()
-            }
-        }
-        TedPermission.with(context)
-            .setPermissionListener(permissionListener)
-//            .setDeniedMessage("[설정] 에서 위치 접근 권한을 부여해야만 사용이 가능합니다.")
-            // 필요한 권한 설정
-            .setPermissions(
-                ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            )
-            .check()
-    }
+
 
 
     private fun searchFilter(searchText:String?){
@@ -151,50 +128,10 @@ class OrderFragment : Fragment(){
         menuAdapter.filterList(filteredList)
     }
     private fun initData(){
+
         ProductService().getProductList(ProductCallback())
-    }
-    private fun initView() {
-        setLastLocation()
-        getProviders()
-    }
-
-    @SuppressLint("MissingPermission", "SetTextI18n")
-    private fun setLastLocation() {
-        Log.d(TAG, "setLastLocation: ")
-        //GPS, NETWORK, PASSIVE에서 가장 최근의 위치 정보 가져오기
-        val lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
-        if (lastKnownLocation != null) {
-            mylat = lastKnownLocation.latitude
-            mylong = lastKnownLocation.longitude
-            distance =DistanceManager.getDistance(lastKnownLocation.latitude, lastKnownLocation.longitude, DEFAULT_LOCATION.latitude, DEFAULT_LOCATION.longitude)
-            binding.distanceInfo.text = "매장과의 거리가 ${distance}m 입니다."
-            Log.d(TAG, "latitude=${lastKnownLocation.latitude}, longitude=${lastKnownLocation.longitude}")
-        }
 
     }
-
-    @SuppressLint("MissingPermission")
-    private fun getProviders(){
-        val listProviders = locationManager.allProviders as MutableList<String>
-        val isEnable = BooleanArray(3)
-        for (provider in listProviders) {
-            when ( provider ) {
-                LocationManager.GPS_PROVIDER -> {//GPS provider라면
-                    isEnable[0] = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
-                    locationManager.requestLocationUpdates(//GPS provider한테 몇 미터마다 리스너를 호출해주세요! 시킴
-                        LocationManager.GPS_PROVIDER,
-                        0,
-                        0f,
-                        listener
-                    )
-
-                    Log.d(TAG, provider + '/' + isEnable[0].toString())
-                }
-            }
-        }
-    }
-
-
 
     inner class ProductCallback: RetrofitCallback<List<Product>> {
         override fun onSuccess( code: Int, productList: List<Product>) {
@@ -233,8 +170,7 @@ class OrderFragment : Fragment(){
     private val listener = object : LocationListener {
         //위치가 변경될때 호출될 method
         @SuppressLint("SetTextI18n")  //원래는 settext할 때 xml에 string 선언해야하는데 이것을 붙이면 노란 게 없어짐
-        override fun onLocationChanged(location: Location) { //location 변경될 때마다 이게 불림
-            Log.d(TAG, "onLocationChanged: ")
+        override fun onLocationChanged(location: Location) {//location 변경될 때마다 이게 불림
             when(location.provider) {
                 LocationManager.GPS_PROVIDER -> {
                     mylat = location.latitude
@@ -243,6 +179,8 @@ class OrderFragment : Fragment(){
                     binding.distanceInfo.setText("매장과의 거리가 ${distance}m 입니다. ")
                     Log.d("$TAG GPS : ", "${location.latitude}/${location.longitude}")
                 }
+
+
             }
         }
 
@@ -281,4 +219,6 @@ class OrderFragment : Fragment(){
             locationManager.removeUpdates(listener)
         }
     }
+
+
 }
