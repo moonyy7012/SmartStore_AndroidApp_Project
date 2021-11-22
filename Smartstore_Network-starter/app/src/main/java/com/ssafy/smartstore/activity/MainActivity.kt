@@ -35,6 +35,8 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.LocationSettingsRequest
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.gun0912.tedpermission.PermissionListener
+import com.gun0912.tedpermission.TedPermission
 import com.ssafy.smartstore.*
 import com.ssafy.smartstore.R
 import com.ssafy.smartstore.adapter.OrderDetailListAdapter
@@ -84,23 +86,12 @@ class MainActivity : AppCompatActivity(), BeaconConsumer{
     lateinit var filters: Array<IntentFilter>
     lateinit var i:Intent
 
-    private lateinit var locationRequest: LocationRequest
-    private val UPDATE_INTERVAL = 1000 // 1 초
-    private val FASTEST_UPDATE_INTERVAL = 500 // 0.5 초
-    private var mFusedLocationClient: FusedLocationProviderClient? = null
-
-
-
 
     // Intent 사용 requestForActivity 선언
-    private val requestActivity: ActivityResultLauncher<Intent> = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult() // ◀ StartActivityForResult 처리를 담당
-    ) {
-        // 사용자가 GPS 를 켰는지 검사함
+    private val requestActivity = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()) {
         if (checkLocationServicesStatus() == false) {
-            Log.d(TAG, "dialog: ")
-            showDialogForLocationServiceSetting()
-
+            Toast.makeText(this, "위치 서비스가 꺼져 있어, 현재 위치를 확인할 수 없습니다.", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -110,16 +101,13 @@ class MainActivity : AppCompatActivity(), BeaconConsumer{
         setContentView(R.layout.activity_main)
         // 가장 첫 화면은 홈 화면의 Fragment로 지정
 
+        checkPermissions()
+
         setNdef()
 
         setBeacon()
 
         createNotificationChannel("ssafy_channel", "ssafy")
-
-        checkPermissions()
-
-
-
 
         supportFragmentManager.beginTransaction()
             .replace(R.id.frame_layout_main, HomeFragment())
@@ -163,6 +151,7 @@ class MainActivity : AppCompatActivity(), BeaconConsumer{
             }
         }
     }
+
 
     fun openFragment(index:Int, key:String, value:Int){
         moveFragment(index, key, value)
@@ -236,8 +225,6 @@ class MainActivity : AppCompatActivity(), BeaconConsumer{
     }
 
     private fun setBeacon(){
-        checkPermissions()
-
         beaconManager = BeaconManager.getInstanceForApplication(this)
         beaconManager.beaconParsers.add(BeaconParser().setBeaconLayout("m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24"))
         bluetoothManager = getSystemService(BLUETOOTH_SERVICE) as BluetoothManager
@@ -258,38 +245,43 @@ class MainActivity : AppCompatActivity(), BeaconConsumer{
         }
     }
 
-    private fun checkPermissions(){
-        val hasFineLocationPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-        if(hasFineLocationPermission != PackageManager.PERMISSION_GRANTED){
-            ActivityCompat.requestPermissions(
-                this,
-                ApplicationClass.requiredPermissions,
-                PERMISSIONS_CODE
+    private fun checkPermissions() {
+        val permissionListener = object : PermissionListener {
+            override fun onPermissionGranted() {
+                if (checkLocationServicesStatus()) {
+                    Log.d(TAG, "onPermissionGranted: checkLocationServicesStatus() == true")
+                } else {
+                    showDialogForLocationServiceSetting()
+                }
+            }
+            override fun onPermissionDenied(deniedPermissions: MutableList<String>?) {
+                Toast.makeText(this@MainActivity, "위치 권한이 거부되었습니다.", Toast.LENGTH_SHORT).show()
+            }
+        }
+        TedPermission.with(this)
+            .setPermissionListener(permissionListener)
+            .setDeniedMessage("[설정] 에서 위치 접근 권한을 부여해야만 사용이 가능합니다.")
+            .setPermissions(
+                Manifest.permission.ACCESS_FINE_LOCATION
             )
-
-            startLocationUpdates()
-        }
-
-
-        locationRequest = LocationRequest.create().apply {
-            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-            interval = UPDATE_INTERVAL.toLong()
-            smallestDisplacement = 10.0f
-            fastestInterval = FASTEST_UPDATE_INTERVAL.toLong()
-        }
-
-        val builder = LocationSettingsRequest.Builder()
-        builder.addLocationRequest(locationRequest)
-        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+            .check()
     }
 
-    // 권한 확인 및 위치 정보 업데이트
-    private fun startLocationUpdates() {
-
-        if (!checkLocationServicesStatus()) {
-            showDialogForLocationServiceSetting()
+    fun showDialogForLocationServiceSetting() {
+        androidx.appcompat.app.AlertDialog.Builder(this).apply {
+            setTitle("위치 서비스 비활성화")
+            setMessage("앱을 사용하기 위해서는 위치 서비스가 필요합니다.\n")
+            setCancelable(true)
+            setPositiveButton("설정") { _, _ ->
+                val callGPSSettingIntent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                requestActivity.launch(callGPSSettingIntent)
+            }
+            setNegativeButton("취소"
+            ) { dialog, _ -> dialog.cancel() }
+            create().show()
         }
     }
+
     // Beacon Scan 시작
     private fun startScan() {
         // 블루투스 Enable 확인
@@ -300,7 +292,6 @@ class MainActivity : AppCompatActivity(), BeaconConsumer{
         }
 
         // 위치 정보 권한 허용 및 GPS Enable 여부 확인
-        checkPermissions()
         Log.d(TAG, "startScan: beacon Scan start")
 
         // Beacon Service bind
@@ -351,8 +342,8 @@ class MainActivity : AppCompatActivity(), BeaconConsumer{
             }
         }
     }
-    override fun onBeaconServiceConnect() {
 
+    override fun onBeaconServiceConnect() {
         beaconManager.addMonitorNotifier(object : MonitorNotifier {
 
             override fun didEnterRegion(region: Region?) {
@@ -498,23 +489,6 @@ class MainActivity : AppCompatActivity(), BeaconConsumer{
                 || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER))
     }
 
-    private fun showDialogForLocationServiceSetting() {
-        val builder: androidx.appcompat.app.AlertDialog.Builder =
-            androidx.appcompat.app.AlertDialog.Builder(this)
-        builder.setTitle("위치 서비스 비활성화")
-        builder.setMessage(
-            "앱을 사용하기 위해서는 위치 서비스가 필요합니다.\n"
-        )
-        builder.setCancelable(true)
-        builder.setPositiveButton("설정") { _, _ ->
-            val callGPSSettingIntent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
-            requestActivity.launch(callGPSSettingIntent)
-        }
-        builder.setNegativeButton(
-            "취소"
-        ) { dialog, _ -> dialog.cancel() }
-        builder.create().show()
-    }
     inner class OrderCallback: RetrofitCallback<Int> {
         override fun onSuccess(code: Int, responseData: Int) {
             orderId = responseData

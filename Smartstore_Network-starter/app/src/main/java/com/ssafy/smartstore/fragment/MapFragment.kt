@@ -9,16 +9,13 @@ import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.location.Geocoder
 import android.location.Location
-import android.location.LocationManager
 import android.net.Uri
 import android.os.Bundle
 import android.os.Looper
-import android.provider.Settings
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
@@ -36,7 +33,7 @@ import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.ssafy.smartstore.activity.MainActivity
 import com.ssafy.smartstore.R
-import com.ssafy.smartstore.fragment.OrderFragment.Companion.DEFAULT_LOCATION
+import com.ssafy.smartstore.fragment.OrderFragment.Companion.DEFAULT_LAT_LNG
 import java.util.*
 
 // Order 탭 - 지도 화면
@@ -73,7 +70,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     private val mapPermissionResult = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { result ->
-        if (!mainActivity.checkLocationServicesStatus()) {
+        if (mainActivity.checkLocationServicesStatus()) {
             needRequest = true
             startLocationUpdates()
         }
@@ -101,7 +98,6 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
 
-
         return view
     }
 
@@ -127,14 +123,14 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                     requiredMapPermission[0]
                 )
             ) {
-                val builder = AlertDialog.Builder(requireContext())
-                builder.setTitle("위치 권한 허용")
-                    .setMessage("위치 권한 허용이 필요합니다")
-                    .setPositiveButton("확인") { _, _ ->
+                AlertDialog.Builder(requireContext()).apply {
+                    setTitle("위치 권한 허용")
+                    setMessage("위치 권한 허용이 필요합니다")
+                    setPositiveButton("확인") { _, _ ->
                         mapPermissionResult.launch(requiredMapPermission[0])
                     }
-                val alertDialog = builder.create()
-                alertDialog.show()
+                    show()
+                }
 
             } else {
                 // 4-1. 사용자가 퍼미션 거부를 한 적이 없는 경우에는 권한 요청
@@ -153,7 +149,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                     val intent = Intent(
                         Intent.ACTION_VIEW, Uri.parse(
                             "https://www.google.com/maps/dir/?api=1&origin=${getAddress(mCurrentLocation.latitude,mCurrentLocation.longitude)}&destination=${getAddress(
-                                DEFAULT_LOCATION.latitude, DEFAULT_LOCATION.longitude)}&mode=r&z=15"
+                                DEFAULT_LAT_LNG.latitude, DEFAULT_LAT_LNG.longitude)}&mode=r&z=15"
 
                         )
                     )
@@ -200,18 +196,18 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
     // 권한 확인 및 위치 정보 업데이트
     private fun startLocationUpdates() {
-            if (checkMapPermission()) {
-                if (!mainActivity.checkLocationServicesStatus()) {
-                    showDialogForLocationServiceSetting()
-                }
-                mFusedLocationClient?.requestLocationUpdates(  //
-                    locationRequest,
-                    locationCallback,
-                    Looper.myLooper()!!
-                )
-                if (mMap != null) mMap!!.isMyLocationEnabled = true
-                if (mMap != null) mMap!!.uiSettings.isZoomControlsEnabled = true
+        if (checkMapPermission()) {
+            if (!mainActivity.checkLocationServicesStatus()) {
+                mainActivity.showDialogForLocationServiceSetting()
             }
+            mFusedLocationClient?.requestLocationUpdates(  //
+                locationRequest,
+                locationCallback,
+                Looper.myLooper()!!
+            )
+            if (mMap != null) mMap!!.isMyLocationEnabled = true
+            if (mMap != null) mMap!!.uiSettings.isZoomControlsEnabled = true
+        }
 
     }
 
@@ -226,19 +222,19 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     // 초기 상가 위치 지정
     private fun setDefaultStoreLocation() {
         val location = Location("")
-        location.latitude = DEFAULT_LOCATION.latitude
-        location.longitude = DEFAULT_LOCATION.longitude
+        location.latitude = DEFAULT_LAT_LNG.latitude
+        location.longitude = DEFAULT_LAT_LNG.longitude
         setCurrentLocation(location)
-        val cameraUpdate = CameraUpdateFactory.newLatLngZoom(DEFAULT_LOCATION, 15f)
+        val cameraUpdate = CameraUpdateFactory.newLatLngZoom(DEFAULT_LAT_LNG, 15f)
         mMap!!.moveCamera(cameraUpdate)
         val bitmap = (ResourcesCompat.getDrawable(
             resources,
-            com.ssafy.smartstore.R.drawable.location_icon,
+            R.drawable.location_icon,
             null
         ) as BitmapDrawable).bitmap
         val resized = Bitmap.createScaledBitmap(bitmap, 100, 100, false)
         val markerOptions = MarkerOptions()
-        markerOptions.position(DEFAULT_LOCATION)
+        markerOptions.position(DEFAULT_LAT_LNG)
         markerOptions.icon(BitmapDescriptorFactory.fromBitmap(resized))
         markerOptions.draggable(true)
 
@@ -258,24 +254,6 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     }
 
     private val GPS_ENABLE_REQUEST_CODE = 2001
-
-    private fun showDialogForLocationServiceSetting() {
-        val builder: androidx.appcompat.app.AlertDialog.Builder =
-            androidx.appcompat.app.AlertDialog.Builder(context as MainActivity)
-        builder.setTitle("위치 서비스 비활성화")
-        builder.setMessage(
-            "앱을 사용하기 위해서는 위치 서비스가 필요합니다.\n"
-        )
-        builder.setCancelable(true)
-        builder.setPositiveButton("설정") { _, _ ->
-            val callGPSSettingIntent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
-            requestActivity.launch(callGPSSettingIntent)
-        }
-        builder.setNegativeButton(
-            "취소"
-        ) { dialog, _ -> dialog.cancel() }
-        builder.create().show()
-    }
 
     override fun onStart() {
         super.onStart()

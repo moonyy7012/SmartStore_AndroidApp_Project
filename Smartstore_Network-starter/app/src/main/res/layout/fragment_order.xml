@@ -21,7 +21,7 @@
             android:layout_width="300dp"
             android:layout_height="wrap_content"
             android:layout_marginRight="20dp"
-            android:text="매장과의 거리가 350m 입니다. "
+            android:text="매장 위치 확인하기"
             android:textSize="18dp" />
 
         <ImageView
