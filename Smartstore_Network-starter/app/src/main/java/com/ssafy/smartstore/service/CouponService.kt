@@ -46,4 +46,24 @@ class CouponService {
             }
         })
     }
+
+    fun updateCouponUsed(couponId: Int, callback: RetrofitCallback<Unit>) {
+        RetrofitUtil.couponService.updateCouponUseState(couponId).enqueue(object : Callback<Unit> {
+            override fun onResponse(call: Call<Unit>, response: Response<Unit>) {
+                val res = response.body()
+                if(response.code() == 200){
+                    if (res != null) {
+                        callback.onSuccess(response.code(), res)
+                    }
+                } else {
+                    callback.onFailure(response.code())
+                }
+            }
+
+            override fun onFailure(call: Call<Unit>, t: Throwable) {
+                callback.onError(t)
+            }
+
+        })
+    }
 }

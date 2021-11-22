@@ -3,6 +3,7 @@ package com.ssafy.smartstore.api
 import com.ssafy.smartstore.dto.Coupon
 import retrofit2.Call
 import retrofit2.http.GET
+import retrofit2.http.PUT
 import retrofit2.http.Path
 
 interface CouponApi {
@@ -11,4 +12,7 @@ interface CouponApi {
 
     @GET("rest/coupon/used/{userId}")
     fun getUsedCouponsByUser(@Path("userId") userId: String): Call<List<Coupon>>
+
+    @PUT("rest/coupon/{couponId}")
+    fun updateCouponUseState(@Path("couponId") couponId: Int): Call<Unit>
 }
