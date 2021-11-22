@@ -23,7 +23,7 @@ import com.ssafy.smartstore.service.UserService
 import com.ssafy.smartstore.util.RetrofitCallback
 
 // MyPage 탭
-private const val TAG = "MypageFragment_싸피"
+private const val TAG = "MyPageFragment_싸피"
 class MyPageFragment : Fragment(){
     private lateinit var orderAdapter : OrderAdapter
     private lateinit var mainActivity: MainActivity

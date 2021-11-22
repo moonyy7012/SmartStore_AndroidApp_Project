@@ -17,7 +17,6 @@ import android.nfc.NfcAdapter
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Looper
 import android.os.RemoteException
 import android.provider.Settings
 import android.util.Log
@@ -27,9 +26,7 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -37,7 +34,6 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.LocationSettingsRequest
-import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.ssafy.smartstore.*
 import com.ssafy.smartstore.R
@@ -49,7 +45,6 @@ import com.ssafy.smartstore.dto.Order
 import com.ssafy.smartstore.dto.OrderDetail
 import com.ssafy.smartstore.fragment.*
 import com.ssafy.smartstore.service.OrderService
-import com.ssafy.smartstore.util.CommonUtils
 import com.ssafy.smartstore.util.RetrofitCallback
 import org.altbeacon.beacon.*
 import java.util.*
@@ -57,7 +52,7 @@ import java.util.*
 private const val TAG = "MainActivity_싸피"
 class MainActivity : AppCompatActivity(), BeaconConsumer{
     private lateinit var bottomNavigation : BottomNavigationView
-    val shppingListViewModel: ShoppingListViewModel by lazy {
+    val shoppingListViewModel: ShoppingListViewModel by lazy {
         ViewModelProvider(this)[ShoppingListViewModel::class.java]
     }
     var tableN = ""
@@ -108,7 +103,6 @@ class MainActivity : AppCompatActivity(), BeaconConsumer{
         }else{
             Log.d(TAG, "dialog: ")
             showDialogForLocationServiceSetting()
-
         }
     }
 
@@ -488,7 +482,7 @@ class MainActivity : AppCompatActivity(), BeaconConsumer{
     }
 
     fun completedOrder() {
-        shppingListViewModel.shoppingList.observe(this, { list ->
+        shoppingListViewModel.shoppingList.observe(this, { list ->
             Log.d(TAG, "completedOrder: $list")
 
             val order = Order().apply {
@@ -505,13 +499,13 @@ class MainActivity : AppCompatActivity(), BeaconConsumer{
     }
 
     // GPS 켜져있는지 확인
-    private fun checkLocationServicesStatus(): Boolean {
+    fun checkLocationServicesStatus(): Boolean {
         val locationManager =
             this.getSystemService(Context.LOCATION_SERVICE) as LocationManager
         return (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
                 || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER))
-        return true
     }
+
     private fun showDialogForLocationServiceSetting() {
         val builder: androidx.appcompat.app.AlertDialog.Builder =
             androidx.appcompat.app.AlertDialog.Builder(this)
@@ -534,7 +528,7 @@ class MainActivity : AppCompatActivity(), BeaconConsumer{
             orderId = responseData
             Toast.makeText(this@MainActivity, "주문이 완료되었습니다.", Toast.LENGTH_SHORT).show()
             readable = false
-            shppingListViewModel.clearCart()
+            shoppingListViewModel.clearCart()
             supportFragmentManager.apply {
                 beginTransaction().remove(ShoppingListFragment()).commit()
                 popBackStack()

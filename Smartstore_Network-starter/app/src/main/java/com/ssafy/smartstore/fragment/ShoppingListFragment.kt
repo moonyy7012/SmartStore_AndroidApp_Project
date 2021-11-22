@@ -17,8 +17,6 @@ import com.ssafy.smartstore.R
 import com.ssafy.smartstore.activity.MainActivity
 import com.ssafy.smartstore.adapter.ShoppingListAdapter
 import com.ssafy.smartstore.databinding.FragmentShoppingListBinding
-import com.ssafy.smartstore.dto.ShoppingCart
-import com.ssafy.smartstore.service.OrderService
 import com.ssafy.smartstore.util.CommonUtils
 
 //장바구니 Fragment
@@ -87,7 +85,7 @@ class ShoppingListFragment : Fragment(){
             isShop = false
         }
         btnOrder.setOnClickListener {
-            mainActivity.shppingListViewModel.shoppingList.observe(viewLifecycleOwner, { list ->
+            mainActivity.shoppingListViewModel.shoppingList.observe(viewLifecycleOwner, { list ->
                 if (list.isEmpty()) {
                     Toast.makeText(context,"주문할 상품이 없습니다.",Toast.LENGTH_SHORT).show()
                 } else {
@@ -102,7 +100,7 @@ class ShoppingListFragment : Fragment(){
         }
         shoppingListAdapter.setOnBoardClickListener(object : ShoppingListAdapter.OnBoardClickListener{
             override fun onBoardItemClick(view: View, position: Int) {
-                mainActivity.shppingListViewModel.removeItem(position)
+                mainActivity.shoppingListViewModel.removeItem(position)
                 shoppingListAdapter.notifyDataSetChanged()
                 initTotal()
             }

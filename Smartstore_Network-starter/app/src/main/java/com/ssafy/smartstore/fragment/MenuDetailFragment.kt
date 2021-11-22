@@ -128,7 +128,7 @@ class MenuDetailFragment : Fragment(){
                 product.type
             )
 
-            mainActivity.shppingListViewModel.addItem(shoppingCart)
+            mainActivity.shoppingListViewModel.addItem(shoppingCart)
             Toast.makeText(context, "상품이 장바구니에 담겼습니다.", Toast.LENGTH_SHORT).show()
         }
         binding.btnCreateComment.setOnClickListener {
