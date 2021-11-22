@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- name space는 BookRepo의 fully qualified name으로 설정한다. -->
+<mapper namespace="com.ssafy.smartstore.model.dao.CouponDao">
+    <insert id="insert" parameterType="UserCoupon">
+        INSERT INTO t_user_coupon
+        (user_id,
+         coupon_id,
+         validate)
+        VALUES
+            (#{userId},
+             #{couponId},
+             #{validate})
+    </insert>
+
+<!--    <update id="update" parameterType="User">-->
+<!--        UPDATE t_user-->
+<!--        SET-->
+<!--            name = #{name},-->
+<!--            pass = #{pass}-->
+<!--        WHERE id = #{id}-->
+<!--    </update>-->
+
+    <update id="update" parameterType="string">
+        UPDATE t_user_coupon
+        SET
+            is_used = "used"
+        WHERE id = #{id}
+    </update>
+
+<!--    <delete id="delete" parameterType="string">-->
+<!--        DELETE FROM t_user_coupon-->
+<!--        WHERE id = #{id}-->
+<!--    </delete>-->
+
+    <!-- 사용자별로 가지고 있는 쿠폰 정보(쿠폰 이름, 쿠폰 종류, 발급일, 유효기간, 사용여부 등) 반환 -->
+    <select id="selectByUserId" parameterType="string" resultType="Map">
+        SELECT u.id, u.user_id, u.coupon_id, u.publish_time, u.validate, u.is_used, c.name, c.type FROM t_user_coupon as u
+        INNER JOIN t_coupon as c
+        ON u.coupon_id = c.id
+        WHERE u.user_id = #{userId}
+        AND u.is_used = "not used"
+    </select>
+
+</mapper>
