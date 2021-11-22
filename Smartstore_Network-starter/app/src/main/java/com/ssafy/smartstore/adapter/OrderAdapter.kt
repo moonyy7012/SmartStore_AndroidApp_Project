@@ -38,7 +38,7 @@ class OrderAdapter(val context: Context, val list:List<LatestOrderResponse>) :Re
             }
 
             textMenuPrice.text = CommonUtils.makeComma(data.totalPrice)
-            textMenuDate.text = CommonUtils.getFormattedString(data.orderDate)
+            textMenuDate.text = CommonUtils.getFormattedStringByTime(data.orderDate)
             textCompleted.text = CommonUtils.isOrderCompleted(data)
             //클릭연결
             itemView.setOnClickListener{

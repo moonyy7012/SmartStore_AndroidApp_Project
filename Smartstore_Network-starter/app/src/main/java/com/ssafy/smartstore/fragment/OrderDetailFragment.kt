@@ -84,7 +84,7 @@ class OrderDetailFragment : Fragment(){
     // OrderDetail 페이지 화면 구성
     private fun setOrderDetailScreen(orderDetails: List<OrderDetailResponse>){
         binding.tvOrderStatus.text = CommonUtils.isOrderCompleted(orderDetails[0])
-        binding.tvOrderDate.text = CommonUtils.getFormattedString(orderDetails[0].orderDate)
+        binding.tvOrderDate.text = CommonUtils.getFormattedStringByTime(orderDetails[0].orderDate)
         var totalPrice = 0
         orderDetails.forEach { totalPrice += it.totalPrice }
         binding.tvTotalPrice.text = CommonUtils.makeComma(totalPrice)

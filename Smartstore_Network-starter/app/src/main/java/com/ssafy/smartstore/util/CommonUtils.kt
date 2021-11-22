@@ -15,16 +15,18 @@ object CommonUtils {
         return "${comma.format(num)} 원"
     }
 
-    fun getFormattedString(date:Date): String {
+    fun getFormattedStringByTime(date:Date): String {
         val dateFormat = SimpleDateFormat("yyyy.MM.dd HH시 mm분")
         dateFormat.timeZone = TimeZone.getTimeZone("Seoul/Asia")
 
         return dateFormat.format(date)
     }
 
-    fun getFormattedString(time:Long): String {
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS", Locale.KOREA)
-        return dateFormat.format(time)
+    fun getFormattedStringByDate(date: Date): String {
+        val dateFormat = SimpleDateFormat("yyyy.MM.dd")
+        dateFormat.timeZone = TimeZone.getTimeZone("Seoul/Asia")
+
+        return dateFormat.format(date)
     }
 
     // 시간 계산을 통해 완성된 제품인지 확인
