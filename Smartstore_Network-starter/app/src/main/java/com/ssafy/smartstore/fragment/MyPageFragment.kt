@@ -23,7 +23,7 @@ import com.ssafy.smartstore.service.UserService
 import com.ssafy.smartstore.util.RetrofitCallback
 
 // MyPage 탭
-private const val TAG = "MypageFragment_싸피"
+private const val TAG = "MyPageFragment_싸피"
 class MyPageFragment : Fragment(){
     private lateinit var orderAdapter : OrderAdapter
     private lateinit var mainActivity: MainActivity
@@ -47,13 +47,16 @@ class MyPageFragment : Fragment(){
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        var id = getUserData()
+        val id = getUserData()
         initData(id)
         UserService().getInfo(id, GetInfoCallback())
+
+        binding.btnCoupon.setOnClickListener {
+            mainActivity.openFragment(6)
+        }
     }
 
     private fun initData(id:String){
-
         val userLastOrderLiveData = OrderService().getLastMonthOrder(id)
         Log.d(TAG, "onViewCreated: ${userLastOrderLiveData.value}")
         userLastOrderLiveData.observe(
@@ -93,12 +96,7 @@ class MyPageFragment : Fragment(){
     }
 
     inner class GetInfoCallback: RetrofitCallback<HashMap<String, Any>> {
-        override fun onError(t: Throwable) {
-            Log.d(TAG, "onError: $t")
-        }
-
         override fun onSuccess(code: Int, responseData: HashMap<String, Any>) {
-
             val grade = responseData["grade"].let {
                 val json = JsonParser().parse(it.toString()).asJsonObject
                 Gson().fromJson<HashMap<String, Any>>(json.toString(), java.util.HashMap::class.java)
@@ -122,6 +120,10 @@ class MyPageFragment : Fragment(){
                 resources.getString(R.string.level_rest),
                 grade["to"].toString().toDouble().toInt()
             )
+        }
+
+        override fun onError(t: Throwable) {
+            Log.d(TAG, "onError: $t")
         }
 
         override fun onFailure(code: Int) {

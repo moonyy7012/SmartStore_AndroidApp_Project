@@ -170,7 +170,8 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
             5 -> {
                 logout()
             }
-            6 -> transaction.replace(R.id.frame_layout_main, MyPageFragment())
+            //coupon
+            6 -> transaction.replace(R.id.frame_layout_main, CouponFragment())
                 .addToBackStack(null)
         }
         transaction.commit()

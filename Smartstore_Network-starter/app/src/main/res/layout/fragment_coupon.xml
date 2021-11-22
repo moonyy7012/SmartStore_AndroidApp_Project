@@ -27,7 +27,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:singleSelection="true"
-            app:selectionRequired="true">
+            app:selectionRequired="true"
+            app:checkedButton="@+id/btn_not_used">
 
             <Button
                 android:id="@+id/btn_not_used"
