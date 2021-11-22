@@ -36,7 +36,6 @@ import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.ssafy.smartstore.activity.MainActivity
 import com.ssafy.smartstore.R
-import com.ssafy.smartstore.config.ApplicationClass.Companion.locationOn
 import com.ssafy.smartstore.fragment.OrderFragment.Companion.DEFAULT_LOCATION
 import java.util.*
 
@@ -70,7 +69,6 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     ) {
         // 사용자가 GPS 를 켰는지 검사함
         if (checkLocationServicesStatus()) {
-            locationOn = true
         }
         startLocationUpdates()
 

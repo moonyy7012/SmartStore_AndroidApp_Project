@@ -1,6 +1,5 @@
 package com.ssafy.smartstore.fragment
 
-import android.Manifest
 import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.annotation.SuppressLint
 import android.content.Context
@@ -16,24 +15,19 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.maps.model.LatLng
 import com.ssafy.smartstore.activity.MainActivity
 import com.ssafy.smartstore.adapter.MenuAdapter
-import com.ssafy.smartstore.config.ApplicationClass
 import com.ssafy.smartstore.databinding.FragmentOrderBinding
 import com.ssafy.smartstore.dto.Product
-import com.ssafy.smartstore.dto.User
 import com.ssafy.smartstore.service.ProductService
 import com.ssafy.smartstore.util.RetrofitCallback
 import java.lang.Math.*
 import kotlin.math.pow
-import com.gun0912.tedpermission.PermissionListener
-import com.gun0912.tedpermission.TedPermission
-import com.ssafy.smartstore.config.ApplicationClass.Companion.locationOn
+
 
 
 // 하단 주문 탭
@@ -83,12 +77,9 @@ class OrderFragment : Fragment(){
         super.onViewCreated(view, savedInstanceState)
 
         initData()
-//        checkPermission()
-//        initView()
+
         distance = DistanceManager.getDistance(mylat, mylong, DEFAULT_LOCATION.latitude, DEFAULT_LOCATION.longitude)
-        if(!locationOn)
-            binding.distanceInfo.setText("매장 위치 확인하기!")
-        else if(mylat==0.1 && mylong==0.1)
+        if(mylat==0.1 && mylong==0.1)
             binding.distanceInfo.setText("매장까지의 거리를 파악하고 있습니다.. ")
         else
             binding.distanceInfo.setText("매장과의 거리가 ${distance}m 입니다. ")
@@ -118,27 +109,7 @@ class OrderFragment : Fragment(){
 
 
     }
-    fun checkPermission() {
-        val permissionListener = object : PermissionListener {
-            // 권한 얻기에 성공했을 때 동작 처리
-            override fun onPermissionGranted() {
-                initView()
-            }
-            // 권한 얻기에 실패했을 때 동작 처리
-            override fun onPermissionDenied(deniedPermissions: MutableList<String>?) {
-//                Toast.makeText(context, "위치 권한이 거부되었습니다.", Toast.LENGTH_SHORT).show()
-            }
-        }
-        TedPermission.with(context)
-            .setPermissionListener(permissionListener)
-//            .setDeniedMessage("[설정] 에서 위치 접근 권한을 부여해야만 사용이 가능합니다.")
-            // 필요한 권한 설정
-            .setPermissions(
-                ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            )
-            .check()
-    }
+
 
 
     private fun searchFilter(searchText:String?){
@@ -159,47 +130,6 @@ class OrderFragment : Fragment(){
         ProductService().getProductList(ProductCallback())
 
     }
-    private fun initView() {
-        setLastLocation()
-        getProviders()
-    }
-
-    @SuppressLint("MissingPermission", "SetTextI18n")
-    private fun setLastLocation() {
-        //GPS, NETWORK, PASSIVE에서 가장 최근의 위치 정보 가져오기
-        var lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
-        if (lastKnownLocation != null) {
-            mylat = lastKnownLocation.latitude
-            mylong = lastKnownLocation.longitude
-            distance =DistanceManager.getDistance(lastKnownLocation.latitude, lastKnownLocation.longitude, DEFAULT_LOCATION.latitude, DEFAULT_LOCATION.longitude)
-            binding.distanceInfo.text = "매장과의 거리가 ${distance}m 입니다."
-            Log.d(TAG, "latitude=${lastKnownLocation.latitude}, longitude=${lastKnownLocation.longitude}")
-        }
-
-    }
-
-    @SuppressLint("MissingPermission")
-    private fun getProviders(){
-        val listProviders = locationManager.allProviders as MutableList<String>
-        val isEnable = BooleanArray(3)
-        for (provider in listProviders) {
-            when ( provider ) {
-                LocationManager.GPS_PROVIDER -> {//GPS provider라면
-                    isEnable[0] = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
-                    locationManager.requestLocationUpdates(//GPS provider한테 몇 미터마다 리스너를 호출해주세요! 시킴
-                        LocationManager.GPS_PROVIDER,
-                        0,
-                        0f,
-                        listener
-                    )
-
-                    Log.d(TAG, provider + '/' + isEnable[0].toString())
-                }
-            }
-        }
-    }
-
-
 
     inner class ProductCallback: RetrofitCallback<List<Product>> {
         override fun onSuccess( code: Int, productList: List<Product>) {
@@ -251,6 +181,7 @@ class OrderFragment : Fragment(){
 
             }
         }
+
 
         override fun onProviderDisabled(provider: String) {
         }
