@@ -11,12 +11,15 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.location.LocationManager
 import android.nfc.NdefMessage
 import android.nfc.NfcAdapter
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Looper
 import android.os.RemoteException
+import android.provider.Settings
 import android.util.Log
 import android.view.View
 import android.widget.TextView
@@ -24,15 +27,23 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.LocationSettingsRequest
+import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.ssafy.smartstore.*
 import com.ssafy.smartstore.R
 import com.ssafy.smartstore.adapter.OrderDetailListAdapter
 import com.ssafy.smartstore.config.ApplicationClass
+import com.ssafy.smartstore.config.ApplicationClass.Companion.locationOn
 import com.ssafy.smartstore.config.ShoppingListViewModel
 import com.ssafy.smartstore.dto.Order
 import com.ssafy.smartstore.dto.OrderDetail
@@ -44,7 +55,7 @@ import org.altbeacon.beacon.*
 import java.util.*
 
 private const val TAG = "MainActivity_싸피"
-class MainActivity : AppCompatActivity(), BeaconConsumer {
+class MainActivity : AppCompatActivity(), BeaconConsumer{
     private lateinit var bottomNavigation : BottomNavigationView
     val shppingListViewModel: ShoppingListViewModel by lazy {
         ViewModelProvider(this)[ShoppingListViewModel::class.java]
@@ -79,6 +90,28 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
     lateinit var filters: Array<IntentFilter>
     lateinit var i:Intent
 
+    private lateinit var locationRequest: LocationRequest
+    private val UPDATE_INTERVAL = 1000 // 1 초
+    private val FASTEST_UPDATE_INTERVAL = 500 // 0.5 초
+    private var mFusedLocationClient: FusedLocationProviderClient? = null
+
+
+
+
+    // Intent 사용 requestForActivity 선언
+    private val requestActivity: ActivityResultLauncher<Intent> = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult() // ◀ StartActivityForResult 처리를 담당
+    ) {
+        // 사용자가 GPS 를 켰는지 검사함
+        if (checkLocationServicesStatus()) {
+            locationOn=true
+        }else{
+            Log.d(TAG, "dialog: ")
+            showDialogForLocationServiceSetting()
+
+        }
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -92,6 +125,9 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
         createNotificationChannel("ssafy_channel", "ssafy")
 
         checkPermissions()
+
+
+
 
         supportFragmentManager.beginTransaction()
             .replace(R.id.frame_layout_main, HomeFragment())
@@ -231,16 +267,43 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
     }
 
     private fun checkPermissions(){
-        if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-            != PackageManager.PERMISSION_GRANTED){
+        val hasFineLocationPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+        if(hasFineLocationPermission != PackageManager.PERMISSION_GRANTED){
             ActivityCompat.requestPermissions(
                 this,
                 ApplicationClass.requiredPermissions,
                 PERMISSIONS_CODE
             )
+            if(hasFineLocationPermission != PackageManager.PERMISSION_DENIED) {
+
+                Toast.makeText(this,"위치권한을 허용해주세요.",Toast.LENGTH_SHORT).show()
+            }else{
+                startLocationUpdates()
+
+            }
+
         }
+
+
+        locationRequest = LocationRequest.create().apply {
+            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+            interval = UPDATE_INTERVAL.toLong()
+            smallestDisplacement = 10.0f
+            fastestInterval = FASTEST_UPDATE_INTERVAL.toLong()
+        }
+
+        val builder = LocationSettingsRequest.Builder()
+        builder.addLocationRequest(locationRequest)
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
     }
 
+    // 권한 확인 및 위치 정보 업데이트
+    private fun startLocationUpdates() {
+
+        if (!checkLocationServicesStatus()) {
+            showDialogForLocationServiceSetting()
+        }
+    }
     // Beacon Scan 시작
     private fun startScan() {
         // 블루투스 Enable 확인
@@ -295,7 +358,7 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
                         if(grantResults[i] != PackageManager.PERMISSION_GRANTED) {
                             //권한 획득 실패
                             Log.i(TAG, "$permission 권한 획득에 실패하였습니다.")
-                            finish()
+//                            finish()
                         }
                     }
                 }
@@ -441,6 +504,31 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
         })
     }
 
+    // GPS 켜져있는지 확인
+    private fun checkLocationServicesStatus(): Boolean {
+        val locationManager =
+            this.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        return (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+                || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER))
+        return true
+    }
+    private fun showDialogForLocationServiceSetting() {
+        val builder: androidx.appcompat.app.AlertDialog.Builder =
+            androidx.appcompat.app.AlertDialog.Builder(this)
+        builder.setTitle("위치 서비스 비활성화")
+        builder.setMessage(
+            "앱을 사용하기 위해서는 위치 서비스가 필요합니다.\n"
+        )
+        builder.setCancelable(true)
+        builder.setPositiveButton("설정") { _, _ ->
+            val callGPSSettingIntent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+            requestActivity.launch(callGPSSettingIntent)
+        }
+        builder.setNegativeButton(
+            "취소"
+        ) { dialog, _ -> dialog.cancel() }
+        builder.create().show()
+    }
     inner class OrderCallback: RetrofitCallback<Int> {
         override fun onSuccess(code: Int, responseData: Int) {
             orderId = responseData
