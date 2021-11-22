@@ -14,4 +14,6 @@ public interface CouponDao {
     int update(String id);
 
     List<Map<String, Object>> selectByUserId(String userId);
+
+    List<Map<String, Object>> selectUsedCouponByUserId(String userId);
 }

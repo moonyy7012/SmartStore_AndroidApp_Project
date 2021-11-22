@@ -14,25 +14,13 @@
              #{validate})
     </insert>
 
-<!--    <update id="update" parameterType="User">-->
-<!--        UPDATE t_user-->
-<!--        SET-->
-<!--            name = #{name},-->
-<!--            pass = #{pass}-->
-<!--        WHERE id = #{id}-->
-<!--    </update>-->
-
     <update id="update" parameterType="string">
         UPDATE t_user_coupon
         SET
-            is_used = "used"
+            is_used = "used", use_time = NOW()
         WHERE id = #{id}
     </update>
 
-<!--    <delete id="delete" parameterType="string">-->
-<!--        DELETE FROM t_user_coupon-->
-<!--        WHERE id = #{id}-->
-<!--    </delete>-->
 
     <!-- 사용자별로 가지고 있는 쿠폰 정보(쿠폰 이름, 쿠폰 종류, 발급일, 유효기간, 사용여부 등) 반환 -->
     <select id="selectByUserId" parameterType="string" resultType="Map">
@@ -41,6 +29,16 @@
         ON u.coupon_id = c.id
         WHERE u.user_id = #{userId}
         AND u.is_used = "not used"
+        ORDER BY u.publish_time DESC
+    </select>
+
+    <!-- 사용자별로 쿠폰 사용 내역(쿠폰 이름, 종류, 발급일, 사용일) 반환   -->
+    <select id="selectUsedCouponByUserId" parameterType="string" resultType="Map">
+        SELECT u.id, u.user_id, u.coupon_id, u.publish_time, u.use_time, u.validate, c.name, c.type FROM t_user_coupon as u
+        INNER JOIN t_coupon as c ON u.coupon_id = c.id
+        WHERE u.user_id = #{userId}
+        AND u.is_used = "used"
+        ORDER BY u.use_time
     </select>
 
 </mapper>
