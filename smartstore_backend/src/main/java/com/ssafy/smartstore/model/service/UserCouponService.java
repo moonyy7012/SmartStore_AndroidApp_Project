@@ -10,7 +10,11 @@ public interface UserCouponService {
 
     List<Map<String, Object>> getUsedCouponByUserId(String userId);
 
+    List<String> getExpiredCouponId();
+
     int usingCoupon(String id);
+
+    int setExpired(String id);
 
     int insertCoupon(UserCoupon coupon);
 }
