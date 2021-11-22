@@ -21,6 +21,13 @@
         WHERE id = #{id}
     </update>
 
+    <!-- 사용 기한 지난 쿠폰 만료 처리 -->
+    <update id="updateExpired" parameterType="string">
+        UPDATE t_user_coupon
+        SET
+            is_used = "expired"
+        WHERE id = #{id}
+    </update>
 
     <!-- 사용자별로 가지고 있는 쿠폰 정보(쿠폰 이름, 쿠폰 종류, 발급일, 유효기간, 사용여부 등) 반환 -->
     <select id="selectByUserId" parameterType="string" resultType="Map">
@@ -39,6 +46,15 @@
         WHERE u.user_id = #{userId}
         AND u.is_used = "used"
         ORDER BY u.use_time
+    </select>
+
+    <!-- 현재 시간과 비교하여 사용 기간이 지난 쿠폰의 고유 id 반환 -->
+    <select id="selectExpiredIdByDate" resultType="string">
+        SELECT id FROM t_user_coupon
+        WHERE
+            <![CDATA[
+		        validate < str_to_date(now(), '%Y-%m-%d')
+ 	        ]]>;
     </select>
 
 </mapper>

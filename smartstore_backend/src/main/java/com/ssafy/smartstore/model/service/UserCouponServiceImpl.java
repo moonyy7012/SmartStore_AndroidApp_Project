@@ -26,8 +26,18 @@ public class UserCouponServiceImpl implements UserCouponService{
     }
 
     @Override
+    public List<String> getExpiredCouponId() {
+        return couponDao.selectExpiredIdByDate();
+    }
+
+    @Override
     public int usingCoupon(String id) {
         return couponDao.update(id);
+    }
+
+    @Override
+    public int setExpired(String id) {
+        return couponDao.updateExpired(id);
     }
 
     @Override
