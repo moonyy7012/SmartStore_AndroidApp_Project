@@ -31,6 +31,11 @@ public class UserCouponServiceImpl implements UserCouponService{
     }
 
     @Override
+    public UserCoupon selectCoupon(String id) {
+        return couponDao.select(id);
+    }
+
+    @Override
     public int usingCoupon(String id) {
         return couponDao.update(id);
     }

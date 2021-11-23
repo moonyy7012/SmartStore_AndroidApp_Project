@@ -1,7 +1,9 @@
 package com.ssafy.smartstore.model.service;
 
 import com.ssafy.smartstore.model.dao.OrderDao;
+import com.ssafy.smartstore.model.dao.OrderDetailDao;
 import com.ssafy.smartstore.model.dto.Order;
+import com.ssafy.smartstore.model.dto.OrderDetail;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,14 +16,27 @@ public class OrderServiceImpl implements OrderService{
     @Autowired
     private OrderDao orderDao;
 
+    @Autowired
+    private OrderDetailDao orderDetailDao;
+
     @Override
     public void makeOrder(Order order) {
         orderDao.insert(order);
     }
 
     @Override
+    public int makeOrderDetail(OrderDetail detail) {
+        return orderDetailDao.insert(detail);
+    }
+
+    @Override
     public Order getOrderWithDetails(Integer orderId) {
         return orderDao.selectWithDetail(orderId);
+    }
+
+    @Override
+    public String getLastOrder() {
+        return orderDao.getLastOrder();
     }
 
     @Override
