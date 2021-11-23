@@ -43,7 +43,6 @@ import com.ssafy.smartstore.*
 import com.ssafy.smartstore.R
 import com.ssafy.smartstore.adapter.OrderDetailListAdapter
 import com.ssafy.smartstore.config.ApplicationClass
-import com.ssafy.smartstore.config.ApplicationClass.Companion.locationOn
 import com.ssafy.smartstore.config.ShoppingListViewModel
 import com.ssafy.smartstore.dto.Order
 import com.ssafy.smartstore.dto.OrderDetail
@@ -104,7 +103,6 @@ class MainActivity : AppCompatActivity(), BeaconConsumer{
     ) {
         // 사용자가 GPS 를 켰는지 검사함
         if (checkLocationServicesStatus()) {
-            locationOn=true
         }else{
             Log.d(TAG, "dialog: ")
             showDialogForLocationServiceSetting()
@@ -274,13 +272,10 @@ class MainActivity : AppCompatActivity(), BeaconConsumer{
                 ApplicationClass.requiredPermissions,
                 PERMISSIONS_CODE
             )
-            if(hasFineLocationPermission != PackageManager.PERMISSION_DENIED) {
 
-                Toast.makeText(this,"위치권한을 허용해주세요.",Toast.LENGTH_SHORT).show()
-            }else{
-                startLocationUpdates()
+            startLocationUpdates()
 
-            }
+
 
         }
 
