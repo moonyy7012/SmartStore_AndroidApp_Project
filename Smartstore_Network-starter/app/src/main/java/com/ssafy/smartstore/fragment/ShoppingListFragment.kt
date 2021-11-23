@@ -129,42 +129,7 @@ class ShoppingListFragment : Fragment(){
             }
         })
         binding.btnSelectCoupon.setOnClickListener {
-            val view = layoutInflater.inflate(R.layout.dialog_coupon, null)
-            val recyclerView = view.findViewById<RecyclerView>(R.id.dialog_coupon_recyclerview)
-            val tvEmptyCoupon = view.findViewById<TextView>(R.id.tv_empty_coupon)
-
-            val dialog = AlertDialog.Builder(requireContext())
-                            .setView(view)
-                            .setPositiveButton("취소", null)
-
-            CouponService().getCouponList(ApplicationClass.sharedPreferencesUtil.getUser().id).observe(
-                viewLifecycleOwner,
-                {
-                    if (it.isEmpty()) {
-                        recyclerView.visibility = View.GONE
-                        tvEmptyCoupon.visibility = View.VISIBLE
-                    } else {
-                        val couponAdapter = CouponAdapter(it).apply {
-                            setItemClickListener(object : CouponAdapter.ItemClickListener {
-                                override fun onClick(view: View, position: Int, userCouponId: Int) {
-                                    this@ShoppingListFragment.userCouponId = userCouponId
-                                    loadDiscount()
-                                    dialog.create().dismiss()
-                                }
-                            })
-                        }
-
-                        recyclerView.apply {
-                            visibility = View.VISIBLE
-                            layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
-                            adapter = couponAdapter
-                        }
-                        tvEmptyCoupon.visibility = View.GONE
-                    }
-                }
-            )
-
-            dialog.show()
+            showDialogCoupon()
         }
     }
 
@@ -186,6 +151,45 @@ class ShoppingListFragment : Fragment(){
         }
 
         return result
+    }
+
+    private fun showDialogCoupon() {
+        val view = layoutInflater.inflate(R.layout.dialog_coupon, null)
+        val recyclerView = view.findViewById<RecyclerView>(R.id.dialog_coupon_recyclerview)
+        val tvEmptyCoupon = view.findViewById<TextView>(R.id.tv_empty_coupon)
+
+        val dialog = AlertDialog.Builder(requireContext())
+            .setView(view)
+            .setPositiveButton("취소", null)
+
+        CouponService().getCouponList(ApplicationClass.sharedPreferencesUtil.getUser().id).observe(
+            viewLifecycleOwner,
+            {
+                if (it.isEmpty()) {
+                    recyclerView.visibility = View.GONE
+                    tvEmptyCoupon.visibility = View.VISIBLE
+                } else {
+                    val couponAdapter = CouponAdapter(it).apply {
+                        setItemClickListener(object : CouponAdapter.ItemClickListener {
+                            override fun onClick(view: View, position: Int, userCouponId: Int) {
+                                this@ShoppingListFragment.userCouponId = userCouponId
+                                loadDiscount()
+                                dialog.create().dismiss()
+                            }
+                        })
+                    }
+
+                    recyclerView.apply {
+                        visibility = View.VISIBLE
+                        layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
+                        adapter = couponAdapter
+                    }
+                    tvEmptyCoupon.visibility = View.GONE
+                }
+            }
+        )
+
+        dialog.show()
     }
 
     private fun showDialogForOrderInShop() {
