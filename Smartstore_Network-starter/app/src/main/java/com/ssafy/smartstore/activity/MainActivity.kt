@@ -43,8 +43,8 @@ import com.ssafy.smartstore.config.ShoppingListViewModel
 import com.ssafy.smartstore.dto.Order
 import com.ssafy.smartstore.dto.OrderDetail
 import com.ssafy.smartstore.fragment.*
+import com.ssafy.smartstore.service.CouponService
 import com.ssafy.smartstore.service.OrderService
-import com.ssafy.smartstore.util.CommonUtils
 import com.ssafy.smartstore.util.RetrofitCallback
 import org.altbeacon.beacon.*
 import java.util.*
