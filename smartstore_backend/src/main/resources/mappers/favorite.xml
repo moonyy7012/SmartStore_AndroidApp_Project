@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- name space는 BookRepo의 fully qualified name으로 설정한다. -->
+<mapper namespace="com.ssafy.smartstore.model.dao.FavoriteDao">
+    <insert id="insert" parameterType="Favorite">
+        INSERT INTO t_favorite(user_id, product_id)
+        VALUES (#{userId}, #{productId})
+    </insert>
+
+    <delete id="delete" parameterType="string">
+        DELETE FROM t_favorite WHERE id = #{id}
+    </delete>
+
+    <select id="select" parameterType="string" resultType="map">
+        select f.id, f.user_id, p.name, p.type, p.price, p.img from t_favorite as f
+        join t_user as u on f.user_id = u.id
+        join t_product as p on f.product_id = p.id
+        where f.user_id = #{userId}
+    </select>
+
+</mapper>

@@ -24,6 +24,18 @@ CREATE TABLE IF NOT EXISTS `t_user_coupon` (
 )
 ENGINE = InnoDB;
 
+CREATE TABLE IF NOT EXISTS `t_favorite` (
+	`id` int NOT NULL auto_increment,
+    `user_id` varchar(100),
+    `product_id` int,
+    primary key(`id`),
+    FOREIGN KEY(`user_id`)
+    REFERENCES `t_user`(`id`),
+    FOREIGN KEY(`product_id`)
+    REFERENCES `t_product`(`id`)
+)
+ENGINE = InnoDB;
+
 insert into t_coupon(name, type) values("10% 할인 쿠폰", "DISCOUNT 10");
 insert into t_coupon(name, type) values("15% 할인 쿠폰", "DISCOUNT 15");
 
