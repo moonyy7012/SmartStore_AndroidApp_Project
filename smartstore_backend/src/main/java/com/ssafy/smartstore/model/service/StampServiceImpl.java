@@ -17,4 +17,9 @@ public class StampServiceImpl implements StampService{
     public List<Stamp> selectByUser(String id) {
         return stampDao.selectByUserId(id);
     }
+
+    @Override
+    public int addStamp(Stamp stamp) {
+        return stampDao.insert(stamp);
+    }
 }

@@ -32,11 +32,18 @@ public class CouponRestController {
         return cService.getUsedCouponByUserId(userId);
     }
 
-    @PutMapping("/{couponId}")
-    @ApiOperation(value="사용자의 쿠폰을 사용 상태로 바꿔줍니다.", response = List.class)
+    @GetMapping("/use/coupon/{id}")
+    @ApiOperation(value="사용할 쿠폰의 정보를 반환합니다.", response = Map.class)
     @Transactional
-    public int usingCoupon(@PathVariable String couponId) {
-        return cService.usingCoupon(couponId);
+    public Map<String, Object> selectCoupon(@PathVariable Integer id) {
+        return cService.selectCoupon(id);
+    }
+
+    @PutMapping("/{id}")
+    @ApiOperation(value="사용자의 쿠폰을 사용 상태로 바꿔줍니다.", response = Boolean.class)
+    @Transactional
+    public Boolean usingCoupon(@PathVariable Integer id) {
+        return cService.usingCoupon(id) > 0;
     }
 
     @PostMapping

@@ -11,9 +11,11 @@ public interface CouponDao {
 
     int insert(UserCoupon userCoupon);
 
-    int update(String id);
+    int update(Integer id);
 
     int updateExpired(String id);
+
+    Map<String, Object> select(Integer id);
 
     List<Map<String, Object>> selectByUserId(String userId);
 

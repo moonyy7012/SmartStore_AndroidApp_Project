@@ -92,4 +92,9 @@
         where user_id=#{id} and order_time > date_add(now(), interval -1 month)
         order by o.o_id desc, d.d_id desc
     </select>
+
+    <select id="getLastOrder" resultType="string">
+        select o_id from t_order
+        order by o_id desc limit 1;
+    </select>
 </mapper>

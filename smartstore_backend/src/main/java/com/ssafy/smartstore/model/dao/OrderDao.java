@@ -18,6 +18,8 @@ public interface OrderDao {
 
     List<Order> selectAll();
 
+    String getLastOrder();
+
     Order selectWithDetail(int id);
 
     List<Order> selectByUser(String userId);

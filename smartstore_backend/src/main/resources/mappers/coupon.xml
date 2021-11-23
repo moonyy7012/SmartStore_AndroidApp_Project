@@ -14,7 +14,7 @@
              #{validate})
     </insert>
 
-    <update id="update" parameterType="string">
+    <update id="update" parameterType="Integer">
         UPDATE t_user_coupon
         SET
             is_used = "used", use_time = NOW()
@@ -29,6 +29,13 @@
         WHERE id = #{id}
     </update>
 
+    <select id="select" parameterType="Integer" resultType="Map">
+        SELECT	u.id, u.user_id, u.coupon_id, u.publish_time, u.use_time, u.validate, u.is_used, c.name, c.type
+        FROM	t_user_coupon as u INNER JOIN t_coupon as c
+        ON 		u.coupon_id = c.id
+        WHERE	u.id = #{id}
+    </select>
+
     <!-- 사용자별로 가지고 있는 쿠폰 정보(쿠폰 이름, 쿠폰 종류, 발급일, 유효기간, 사용여부 등) 반환 -->
     <select id="selectByUserId" parameterType="string" resultType="Map">
         SELECT u.id, u.user_id, u.coupon_id, u.publish_time, u.validate, u.is_used, c.name, c.type FROM t_user_coupon as u
@@ -36,7 +43,7 @@
         ON u.coupon_id = c.id
         WHERE u.user_id = #{userId}
         AND u.is_used = "not used"
-        ORDER BY u.publish_time DESC
+        ORDER BY u.publish_time DESC 
     </select>
 
     <!-- 사용자별로 쿠폰 사용 내역(쿠폰 이름, 종류, 발급일, 사용일) 반환   -->
@@ -45,7 +52,7 @@
         INNER JOIN t_coupon as c ON u.coupon_id = c.id
         WHERE u.user_id = #{userId}
         AND u.is_used = "used"
-        ORDER BY u.use_time
+        ORDER BY u.use_time DESC
     </select>
 
     <!-- 현재 시간과 비교하여 사용 기간이 지난 쿠폰의 고유 id 반환 -->

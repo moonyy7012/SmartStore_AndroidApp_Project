@@ -11,4 +11,6 @@ public interface StampService {
      * @return
      */
     List<Stamp> selectByUser(String id);
+
+    int addStamp(Stamp stamp);
 }
