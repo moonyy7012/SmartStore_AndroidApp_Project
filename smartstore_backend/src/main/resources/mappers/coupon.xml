@@ -29,6 +29,10 @@
         WHERE id = #{id}
     </update>
 
+    <select id="select" parameterType="string" resultType="UserCoupon">
+        select * from t_user_coupon where id = #{id}
+    </select>
+
     <!-- 사용자별로 가지고 있는 쿠폰 정보(쿠폰 이름, 쿠폰 종류, 발급일, 유효기간, 사용여부 등) 반환 -->
     <select id="selectByUserId" parameterType="string" resultType="Map">
         SELECT u.id, u.user_id, u.coupon_id, u.publish_time, u.validate, u.is_used, c.name, c.type FROM t_user_coupon as u

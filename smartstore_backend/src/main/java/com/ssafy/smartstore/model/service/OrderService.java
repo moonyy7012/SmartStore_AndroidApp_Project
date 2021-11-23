@@ -1,6 +1,7 @@
 package com.ssafy.smartstore.model.service;
 
 import com.ssafy.smartstore.model.dto.Order;
+import com.ssafy.smartstore.model.dto.OrderDetail;
 
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,8 @@ public interface OrderService {
      */
     public void makeOrder(Order order);
 
+    public int makeOrderDetail(OrderDetail detail);
+
     /**
      * orderId에 대한 Order를 반환한다.
      * 이때 Order에 해당하는 OrderDetail에 대한 내용까지 반환한다.
@@ -23,6 +26,12 @@ public interface OrderService {
      * @return
      */
     public Order getOrderWithDetails(Integer orderId);
+
+
+    /**
+     * 마지막 주문에 대한 id를 반환한다.
+     * */
+    public String getLastOrder();
 
 
     /**

@@ -32,6 +32,13 @@ public class CouponRestController {
         return cService.getUsedCouponByUserId(userId);
     }
 
+    @GetMapping("/use/coupon")
+    @ApiOperation(value="사용할 쿠폰의 정보를 반환합니다.")
+    @Transactional
+    public UserCoupon selectCoupon(String id) {
+        return cService.selectCoupon(id);
+    }
+
     @PutMapping("/{couponId}")
     @ApiOperation(value="사용자의 쿠폰을 사용 상태로 바꿔줍니다.", response = List.class)
     @Transactional

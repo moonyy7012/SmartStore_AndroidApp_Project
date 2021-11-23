@@ -12,6 +12,8 @@ public interface UserCouponService {
 
     List<String> getExpiredCouponId();
 
+    UserCoupon selectCoupon(String id);
+
     int usingCoupon(String id);
 
     int setExpired(String id);
