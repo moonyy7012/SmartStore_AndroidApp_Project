@@ -5,6 +5,7 @@ import java.util.*
 
 data class Coupon(
     var id: Int,
+    @SerializedName("coupon_id") var couponId: Int,
     @SerializedName("user_id") var userId: String,
     var name: String,
     @SerializedName("publish_time") var publishTime: Date,
