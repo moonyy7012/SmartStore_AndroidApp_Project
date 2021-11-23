@@ -20,6 +20,7 @@ public class StampServiceImpl implements StampService{
 
     @Override
     public int addStamp(Stamp stamp) {
+
         return stampDao.insert(stamp);
     }
 }

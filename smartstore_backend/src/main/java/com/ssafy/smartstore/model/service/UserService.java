@@ -36,4 +36,7 @@ public interface UserService {
     public boolean isUsedId(String id);
 
     public User select(String id);
+
+    // User의 Stamp 개수를 업데이트한다.
+    public int updateStamp(User user);
 }

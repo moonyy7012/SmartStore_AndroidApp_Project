@@ -1,12 +1,11 @@
-package com.ssafy.smartstore.model.dao;
+package com.ssafy.smartstore.model.service;
 
 import com.ssafy.smartstore.model.dto.Coupon;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@Component
-public interface CouponDao {
+public interface CouponService {
+
     int insert(Coupon coupon);
 
     List<Coupon> select();

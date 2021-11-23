@@ -19,4 +19,10 @@ public interface ProductService {
      * @return
      */
     List<Map<String, Object>> selectWithComment(Integer productId);
+
+    int insert(Product product);
+
+    int delete(Integer productId);
+
+    int update(Product product);
 }

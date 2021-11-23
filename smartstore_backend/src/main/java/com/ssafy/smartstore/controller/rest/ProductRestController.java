@@ -29,4 +29,22 @@ public class ProductRestController {
     public List<Map<String, Object>> getProductWithComments(@PathVariable Integer productId){
         return productService.selectWithComment(productId);
     }
+
+    @PostMapping
+    @ApiOperation(value="상품 정보를 DB에 저장합니다. (관리자용)")
+    public int insert(@RequestBody Product product) {
+        return productService.insert(product);
+    }
+
+    @DeleteMapping("/delete")
+    @ApiOperation(value="id에 해당하는 상품 정보를 삭제합니다. (관리자용)")
+    public int delete(Integer productId) {
+        return productService.delete(productId);
+    }
+
+    @PutMapping("/update")
+    @ApiOperation(value = "상품 정보를 업데이트합니다.")
+    public int update(@RequestBody Product product) {
+        return productService.update(product);
+    }
 }

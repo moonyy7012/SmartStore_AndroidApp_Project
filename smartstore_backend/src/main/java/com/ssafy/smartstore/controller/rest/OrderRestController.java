@@ -3,8 +3,10 @@ package com.ssafy.smartstore.controller.rest;
 import com.ssafy.smartstore.model.dto.Order;
 import com.ssafy.smartstore.model.dto.OrderDetail;
 import com.ssafy.smartstore.model.dto.Stamp;
+import com.ssafy.smartstore.model.dto.User;
 import com.ssafy.smartstore.model.service.OrderService;
 import com.ssafy.smartstore.model.service.StampService;
+import com.ssafy.smartstore.model.service.UserService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +26,9 @@ public class OrderRestController {
     @Autowired
     private StampService stampService;
 
+    @Autowired
+    private UserService userService;
+
     @PostMapping
     @ApiOperation(value="order 객체를 저장하고 추가된 Order의 id를 반환한다.", response = Integer.class)
     @Transactional
@@ -35,6 +40,7 @@ public class OrderRestController {
 
         for (OrderDetail o : order.getDetails()) {
             o.setOrderId(order.getId());
+
             // OrderDetail DB에 저장
             orderService.makeOrderDetail(o);
             quantity += o.getQuantity();
@@ -43,6 +49,10 @@ public class OrderRestController {
         // 스탬프 기록 반영
         Stamp stamp = new Stamp(order.getUserId(), order.getId(), quantity);
         stampService.addStamp(stamp);
+
+        User user = userService.select(order.getUserId());
+        user.setStamps(quantity);
+        userService.updateStamp(user);
 
         return order.getId();
     }

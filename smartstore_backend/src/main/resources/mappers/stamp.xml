@@ -37,4 +37,5 @@
         <result column="user_id" property="userId" />
         <result column="quantity" property="quantity" />
     </resultMap>
+
 </mapper>

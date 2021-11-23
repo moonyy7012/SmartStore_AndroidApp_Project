@@ -23,4 +23,19 @@ public class ProductServiceImpl implements ProductService{
     public List<Map<String, Object>> selectWithComment(Integer productId) {
         return productDao.selectWithComment(productId);
     }
+
+    @Override
+    public int insert(Product product) {
+        return productDao.insert(product);
+    }
+
+    @Override
+    public int delete(Integer productId) {
+        return productDao.delete(productId);
+    }
+
+    @Override
+    public int update(Product product) {
+        return productDao.update(product);
+    }
 }

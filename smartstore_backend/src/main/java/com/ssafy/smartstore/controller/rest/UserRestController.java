@@ -95,6 +95,7 @@ public class UserRestController {
             List<Order> orders = oService.getOrderByUser(id);
             info.put("order", orders);
             info.put("grade", getGrade(selected.getStamps()));
+
             return info;
         }
     }
