@@ -2,7 +2,6 @@ package com.ssafy.smartstore.fragment
 
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -14,9 +13,7 @@ import com.ssafy.smartstore.activity.MainActivity
 import com.ssafy.smartstore.adapter.CouponAdapter
 import com.ssafy.smartstore.config.ApplicationClass
 import com.ssafy.smartstore.databinding.FragmentCouponBinding
-import com.ssafy.smartstore.dto.Coupon
 import com.ssafy.smartstore.service.CouponService
-import com.ssafy.smartstore.util.RetrofitCallback
 
 private const val TAG = "CouponFragment_싸피"
 class CouponFragment : Fragment() {
@@ -47,8 +44,7 @@ class CouponFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val userId = ApplicationClass.sharedPreferencesUtil.getUser().id
-        CouponService().getCouponList(userId, CouponCallback(1))
+        loadCoupon(1)
 
         binding.couponRecyclerview.apply {
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
@@ -72,36 +68,37 @@ class CouponFragment : Fragment() {
             if (isChecked) {
                 when(checkedId) {
                     R.id.btn_not_used -> {
-                        CouponService().getCouponList(userId, CouponCallback(1))
+                        loadCoupon(1)
                     }
                     R.id.btn_used -> {
-                        CouponService().getCouponHistory(userId, CouponCallback(2))
+                        loadCoupon(2)
                     }
                 }
             }
         }
     }
 
-    inner class CouponCallback(private val choice: Int) : RetrofitCallback<List<Coupon>> {
-        override fun onSuccess(code: Int, couponList: List<Coupon>) {
-            Log.d(TAG, "onSuccess: choice: $choice, couponList : $couponList")
-            couponAdapter.apply {
-                list = couponList
-                selected = choice
-                notifyDataSetChanged()
+    private fun loadCoupon(choice: Int) {
+        val userId = ApplicationClass.sharedPreferencesUtil.getUser().id
+        when(choice) {
+            1 -> {
+                CouponService().getCouponList(userId).observe(viewLifecycleOwner, {
+                    couponAdapter.apply {
+                        list = it
+                        selected = choice
+                        notifyDataSetChanged()
+                    }
+                })
             }
-        }
-
-        override fun onError(t: Throwable) {
-            Log.d(TAG, "onError: $t")
-            couponAdapter.apply {
-                list = emptyList()
-                notifyDataSetChanged()
+            2 -> {
+                CouponService().getCouponHistory(userId).observe(viewLifecycleOwner, {
+                    couponAdapter.apply {
+                        list = it
+                        selected = choice
+                        notifyDataSetChanged()
+                    }
+                })
             }
-        }
-
-        override fun onFailure(code: Int) {
-            Log.d(TAG, "onFailure: $code")
         }
 
     }

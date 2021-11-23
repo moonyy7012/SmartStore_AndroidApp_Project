@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -15,10 +16,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ssafy.smartstore.R
 import com.ssafy.smartstore.activity.MainActivity
+import com.ssafy.smartstore.adapter.CouponAdapter
 import com.ssafy.smartstore.adapter.ShoppingListAdapter
+import com.ssafy.smartstore.config.ApplicationClass
 import com.ssafy.smartstore.databinding.FragmentShoppingListBinding
-import com.ssafy.smartstore.dto.ShoppingCart
-import com.ssafy.smartstore.service.OrderService
+import com.ssafy.smartstore.service.CouponService
 import com.ssafy.smartstore.util.CommonUtils
 
 //장바구니 Fragment
@@ -29,6 +31,7 @@ class ShoppingListFragment : Fragment(){
     private lateinit var btnTakeout : Button
     private lateinit var btnOrder : Button
     private var isShop : Boolean = true
+    private var couponId = -1
     private lateinit var binding: FragmentShoppingListBinding
 
     override fun onAttach(context: Context) {
@@ -39,6 +42,9 @@ class ShoppingListFragment : Fragment(){
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mainActivity.hideBottomNav(true)
+        arguments?.let {
+            couponId = it.getInt("orderId")
+        }
     }
 
     override fun onCreateView(
@@ -73,6 +79,21 @@ class ShoppingListFragment : Fragment(){
     private fun initTotal() {
         binding.textShoppingCount.text = "총 ${shoppingListAdapter.getTotalCount()}개"
         binding.textShoppingMoney.text = CommonUtils.makeComma(shoppingListAdapter.getTotalPrice())
+        loadDiscount()
+    }
+
+    private fun loadDiscount() {
+        if (couponId > 0) {
+//            val coupon = Coupon() // 서비스에서 받아와야함.
+//            val disCountPrice = getDiscountPrice(shoppingListAdapter.getTotalPrice(), coupon.type)
+//            binding.tvSelectedCoupon.text = "적용된 쿠폰( ${coupon.name} )"
+//            binding.tvDiscountPrice.text = "- ${CommonUtils.makeComma(disCountPrice)}"
+//            binding.tvFinalMoney.text = CommonUtils.makeComma(shoppingListAdapter.getTotalPrice() - disCountPrice)
+        } else {
+            binding.tvSelectedCoupon.text = "적용된 쿠폰( 없음 )"
+            binding.tvDiscountPrice.text = "- 0 원"
+            binding.tvFinalMoney.text = CommonUtils.makeComma(shoppingListAdapter.getTotalPrice())
+        }
     }
 
     private fun initListener() {
@@ -107,11 +128,65 @@ class ShoppingListFragment : Fragment(){
                 initTotal()
             }
         })
+        binding.btnSelectCoupon.setOnClickListener {
+            val view = layoutInflater.inflate(R.layout.dialog_coupon, null)
+            val recyclerView = view.findViewById<RecyclerView>(R.id.dialog_coupon_recyclerview)
+            val tvEmptyCoupon = view.findViewById<TextView>(R.id.tv_empty_coupon)
+
+            val dialog = AlertDialog.Builder(requireContext())
+                            .setView(view)
+                            .setPositiveButton("취소", null)
+
+            CouponService().getCouponList(ApplicationClass.sharedPreferencesUtil.getUser().id).observe(
+                viewLifecycleOwner,
+                {
+                    if (it.isEmpty()) {
+                        recyclerView.visibility = View.GONE
+                        tvEmptyCoupon.visibility = View.VISIBLE
+                    } else {
+                        val couponAdapter = CouponAdapter(it).apply {
+                            setItemClickListener(object : CouponAdapter.ItemClickListener {
+                                override fun onClick(view: View, position: Int, id: Int) {
+                                    // 쿠폰 적용
+                                    couponId = id
+                                    loadDiscount()
+                                    dialog.create().dismiss()
+                                }
+                            })
+                        }
+
+                        recyclerView.apply {
+                            visibility = View.VISIBLE
+                            layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
+                            adapter = couponAdapter
+                        }
+                        tvEmptyCoupon.visibility = View.GONE
+                    }
+                }
+            )
+
+            dialog.show()
+        }
     }
 
     override fun onDestroy() {
         super.onDestroy()
         mainActivity.hideBottomNav(false)
+    }
+
+    private fun getDiscountPrice(price: Int, type: String): Int {
+        var result = price
+
+        when(type) {
+            "DISCOUNT 15" -> {
+                result = (price * 0.15).toInt()
+            }
+            "DISCOUNT 10" -> {
+                result = (price * 0.10).toInt()
+            }
+        }
+
+        return result
     }
 
     private fun showDialogForOrderInShop() {
