@@ -43,7 +43,7 @@
         ON u.coupon_id = c.id
         WHERE u.user_id = #{userId}
         AND u.is_used = "not used"
-        ORDER BY u.publish_time DESC
+        ORDER BY u.publish_time DESC 
     </select>
 
     <!-- 사용자별로 쿠폰 사용 내역(쿠폰 이름, 종류, 발급일, 사용일) 반환   -->
