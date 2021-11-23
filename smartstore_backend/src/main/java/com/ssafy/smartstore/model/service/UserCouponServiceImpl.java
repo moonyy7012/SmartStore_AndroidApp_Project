@@ -31,12 +31,12 @@ public class UserCouponServiceImpl implements UserCouponService{
     }
 
     @Override
-    public UserCoupon selectCoupon(String id) {
+    public Map<String, Object> selectCoupon(Integer id) {
         return couponDao.select(id);
     }
 
     @Override
-    public int usingCoupon(String id) {
+    public int usingCoupon(Integer id) {
         return couponDao.update(id);
     }
 

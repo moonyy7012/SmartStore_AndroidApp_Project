@@ -12,9 +12,9 @@ public interface UserCouponService {
 
     List<String> getExpiredCouponId();
 
-    UserCoupon selectCoupon(String id);
+    Map<String, Object> selectCoupon(Integer id);
 
-    int usingCoupon(String id);
+    int usingCoupon(Integer id);
 
     int setExpired(String id);
 
