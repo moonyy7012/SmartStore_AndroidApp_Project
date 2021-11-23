@@ -66,7 +66,7 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
     private val BEACON_UUID = "fda50693-a4e2-4fb1-afcf-c6eb07647825"
     private val BEACON_MAJOR = "10004"
     private val BEACON_MINOR = "54480"
-    private val STORE_DISTANCE = 1 // 스토어 거리 1m
+    private val STORE_DISTANCE = 30 //스토어 거리 30m
 
     private val region = Region("altbeacon"
         , Identifier.parse(BEACON_UUID)
@@ -377,18 +377,15 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
 
         beaconManager.addRangeNotifier { beacons, region ->
             for (beacon in beacons) {
-                // Major, Minor로 Beacon 구별, 1미터 이내에 들어오면 다이얼로그 출력
+                // Major, Minor로 Beacon 구별, 30미터 이내에 들어오면 다이얼로그 출력
                 if(isStoreBeacon(beacon)){
-                    if (beacon.distance <= STORE_DISTANCE) {
                         // 주문한건지 확인
+                        isNear = true
                         showPopDialog()
                         beaconManager.stopMonitoringBeaconsInRegion(region)
                         beaconManager.stopRangingBeaconsInRegion(region)
-                    }
 
-                    if (beacon.distance <= 200) {
-                        isNear = true
-                    }
+
                 }
             }
         }

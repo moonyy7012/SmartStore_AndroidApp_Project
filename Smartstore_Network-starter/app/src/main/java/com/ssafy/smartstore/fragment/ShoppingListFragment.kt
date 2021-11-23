@@ -110,8 +110,8 @@ class ShoppingListFragment : Fragment(){
                 } else {
                     if(isShop) showDialogForOrderInShop()
                     else {
-                        //거리가 200이상이라면
-                        if(!mainActivity.isNear) showDialogForOrderTakeoutOver200m()
+                        //거리가 30m이상이라면
+                        if(!mainActivity.isNear) showDialogForOrderTakeoutOver30m()
                         else mainActivity.completedOrder()
                     }
                 }
@@ -208,11 +208,11 @@ class ShoppingListFragment : Fragment(){
         mainActivity.readable = true
     }
 
-    private fun showDialogForOrderTakeoutOver200m() {
+    private fun showDialogForOrderTakeoutOver30m() {
         val builder: AlertDialog.Builder = AlertDialog.Builder(requireContext())
         builder.setTitle("알림")
         builder.setMessage(
-            "현재 고객님의 위치가 매장과 200m 이상 떨어져 있습니다.\n정말 주문하시겠습니까?"
+            "현재 고객님의 위치가 매장과 30m 이상 떨어져 있습니다.\n정말 주문하시겠습니까?"
         )
         builder.setCancelable(true)
         builder.setPositiveButton("확인") { _, _ ->
