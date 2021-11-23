@@ -79,6 +79,11 @@ class CouponFragment : Fragment() {
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        mainActivity.hideBottomNav(false)
+    }
+
     private fun loadCoupon(choice: Int) {
         val userId = ApplicationClass.sharedPreferencesUtil.getUser().id
         when(choice) {
