@@ -4,10 +4,12 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.DialogInterface
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -15,13 +17,17 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ssafy.smartstore.R
 import com.ssafy.smartstore.activity.MainActivity
+import com.ssafy.smartstore.adapter.CouponAdapter
 import com.ssafy.smartstore.adapter.ShoppingListAdapter
+import com.ssafy.smartstore.config.ApplicationClass
 import com.ssafy.smartstore.databinding.FragmentShoppingListBinding
-import com.ssafy.smartstore.dto.ShoppingCart
-import com.ssafy.smartstore.service.OrderService
+import com.ssafy.smartstore.dto.Coupon
+import com.ssafy.smartstore.service.CouponService
 import com.ssafy.smartstore.util.CommonUtils
+import com.ssafy.smartstore.util.RetrofitCallback
 
 //장바구니 Fragment
+private const val TAG = "ShoppingListFragment_싸피"
 class ShoppingListFragment : Fragment(){
     private lateinit var shoppingListAdapter : ShoppingListAdapter
     private lateinit var mainActivity: MainActivity
@@ -73,6 +79,17 @@ class ShoppingListFragment : Fragment(){
     private fun initTotal() {
         binding.textShoppingCount.text = "총 ${shoppingListAdapter.getTotalCount()}개"
         binding.textShoppingMoney.text = CommonUtils.makeComma(shoppingListAdapter.getTotalPrice())
+        loadDiscount()
+    }
+
+    private fun loadDiscount() {
+        if (mainActivity.userCouponId > 0) {
+            CouponService().getCoupon(mainActivity.userCouponId, GetCouponCallback())
+        } else {
+            binding.tvSelectedCoupon.text = "적용된 쿠폰( 없음 )"
+            binding.tvDiscountPrice.text = "- 0 원"
+            binding.tvFinalMoney.text = CommonUtils.makeComma(shoppingListAdapter.getTotalPrice())
+        }
     }
 
     private fun initListener() {
@@ -87,14 +104,14 @@ class ShoppingListFragment : Fragment(){
             isShop = false
         }
         btnOrder.setOnClickListener {
-            mainActivity.shppingListViewModel.shoppingList.observe(viewLifecycleOwner, { list ->
+            mainActivity.shoppingListViewModel.shoppingList.observe(viewLifecycleOwner, { list ->
                 if (list.isEmpty()) {
                     Toast.makeText(context,"주문할 상품이 없습니다.",Toast.LENGTH_SHORT).show()
                 } else {
                     if(isShop) showDialogForOrderInShop()
                     else {
-                        //거리가 200이상이라면
-                        if(!mainActivity.isNear) showDialogForOrderTakeoutOver200m()
+                        //거리가 30m이상이라면
+                        if(!mainActivity.isNear) showDialogForOrderTakeoutOver30m()
                         else mainActivity.completedOrder()
                     }
                 }
@@ -102,16 +119,74 @@ class ShoppingListFragment : Fragment(){
         }
         shoppingListAdapter.setOnBoardClickListener(object : ShoppingListAdapter.OnBoardClickListener{
             override fun onBoardItemClick(view: View, position: Int) {
-                mainActivity.shppingListViewModel.removeItem(position)
+                mainActivity.shoppingListViewModel.removeItem(position)
                 shoppingListAdapter.notifyDataSetChanged()
                 initTotal()
             }
         })
+        binding.btnSelectCoupon.setOnClickListener {
+            showDialogCoupon()
+        }
     }
 
     override fun onDestroy() {
         super.onDestroy()
         mainActivity.hideBottomNav(false)
+    }
+
+    private fun getDiscountPrice(price: Int, type: String): Int {
+        var result = price
+
+        when(type) {
+            "DISCOUNT 15" -> {
+                result = (price * 0.15).toInt()
+            }
+            "DISCOUNT 10" -> {
+                result = (price * 0.10).toInt()
+            }
+        }
+
+        return result
+    }
+
+    private fun showDialogCoupon() {
+        val view = layoutInflater.inflate(R.layout.dialog_coupon, null)
+        val recyclerView = view.findViewById<RecyclerView>(R.id.dialog_coupon_recyclerview)
+        val tvEmptyCoupon = view.findViewById<TextView>(R.id.tv_empty_coupon)
+
+        val dialog = AlertDialog.Builder(requireContext())
+            .setView(view)
+            .setPositiveButton("취소", null)
+
+        val ad = dialog.create()
+        CouponService().getCouponList(ApplicationClass.sharedPreferencesUtil.getUser().id).observe(
+            viewLifecycleOwner,
+            {
+                if (it.isEmpty()) {
+                    recyclerView.visibility = View.GONE
+                    tvEmptyCoupon.visibility = View.VISIBLE
+                } else {
+                    val couponAdapter = CouponAdapter(it).apply {
+                        setItemClickListener(object : CouponAdapter.ItemClickListener {
+                            override fun onClick(view: View, position: Int, userCouponId: Int) {
+                                mainActivity.userCouponId = userCouponId
+                                loadDiscount()
+                                ad.dismiss()
+                            }
+                        })
+                    }
+
+                    recyclerView.apply {
+                        visibility = View.VISIBLE
+                        layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
+                        adapter = couponAdapter
+                    }
+                    tvEmptyCoupon.visibility = View.GONE
+                }
+            }
+        )
+
+        ad.show()
     }
 
     private fun showDialogForOrderInShop() {
@@ -123,20 +198,23 @@ class ShoppingListFragment : Fragment(){
             }
         }
 
-        AlertDialog.Builder(mainActivity)
+        val nfcDialog = AlertDialog.Builder(mainActivity)
             .setTitle("알림")
             .setMessage("Table NFC를 찍어주세요")
-            .setNegativeButton("확인", listener)
-            .show()
+            .setNegativeButton("취소", listener)
+            .setCancelable(false)
 
+
+        nd = nfcDialog.create()
+        nd!!.show()
         mainActivity.readable = true
     }
 
-    private fun showDialogForOrderTakeoutOver200m() {
+    private fun showDialogForOrderTakeoutOver30m() {
         val builder: AlertDialog.Builder = AlertDialog.Builder(requireContext())
         builder.setTitle("알림")
         builder.setMessage(
-            "현재 고객님의 위치가 매장과 200m 이상 떨어져 있습니다.\n정말 주문하시겠습니까?"
+            "현재 고객님의 위치가 매장과 30m 이상 떨어져 있습니다.\n정말 주문하시겠습니까?"
         )
         builder.setCancelable(true)
         builder.setPositiveButton("확인") { _, _ ->
@@ -148,7 +226,30 @@ class ShoppingListFragment : Fragment(){
         builder.create().show()
     }
 
+    inner class GetCouponCallback : RetrofitCallback<Coupon> {
+        override fun onSuccess(code: Int, coupon: Coupon) {
+            Log.d(TAG, "onSuccess: $coupon")
+            val disCountPrice = getDiscountPrice(shoppingListAdapter.getTotalPrice(), coupon.type)
+            binding.tvSelectedCoupon.setText("적용된 쿠폰( ${coupon.name} )")
+            binding.tvDiscountPrice.text = "- ${CommonUtils.makeComma(disCountPrice)}"
+            binding.tvFinalMoney.text = CommonUtils.makeComma(shoppingListAdapter.getTotalPrice() - disCountPrice)
+        }
+
+        override fun onError(t: Throwable) {
+            Log.d(TAG, t.message ?: "쿠폰 정보 불러오는 중 통신오류")
+            binding.tvSelectedCoupon.text = "적용된 쿠폰( 없음 )"
+            binding.tvDiscountPrice.text = "- 0 원"
+            binding.tvFinalMoney.text = CommonUtils.makeComma(shoppingListAdapter.getTotalPrice())
+        }
+
+        override fun onFailure(code: Int) {
+            Log.d(TAG, "onResponse: Error Code $code")
+        }
+
+    }
+
     companion object {
+        var nd:AlertDialog?=null
         @JvmStatic
         fun newInstance(key:String, value:Int) =
             ShoppingListFragment().apply {

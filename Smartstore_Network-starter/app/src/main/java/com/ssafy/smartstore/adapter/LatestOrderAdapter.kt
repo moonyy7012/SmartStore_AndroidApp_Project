@@ -37,7 +37,7 @@ class LatestOrderAdapter(val context: Context, val list: List<LatestOrderRespons
             }
 
             textMenuPrice.text = CommonUtils.makeComma(data.totalPrice)
-            textMenuDate.text = CommonUtils.getFormattedString(data.orderDate)
+            textMenuDate.text = CommonUtils.getFormattedStringByTime(data.orderDate)
         }
     }
 

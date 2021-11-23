@@ -17,7 +17,6 @@ import android.nfc.NfcAdapter
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Looper
 import android.os.RemoteException
 import android.provider.Settings
 import android.util.Log
@@ -27,9 +26,7 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -37,7 +34,6 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.LocationSettingsRequest
-import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.ssafy.smartstore.*
 import com.ssafy.smartstore.R
@@ -47,20 +43,22 @@ import com.ssafy.smartstore.config.ShoppingListViewModel
 import com.ssafy.smartstore.dto.Order
 import com.ssafy.smartstore.dto.OrderDetail
 import com.ssafy.smartstore.fragment.*
+import com.ssafy.smartstore.fragment.ShoppingListFragment.Companion.nd
+import com.ssafy.smartstore.service.CouponService
 import com.ssafy.smartstore.service.OrderService
-import com.ssafy.smartstore.util.CommonUtils
 import com.ssafy.smartstore.util.RetrofitCallback
 import org.altbeacon.beacon.*
 import java.util.*
 
 private const val TAG = "MainActivity_싸피"
-class MainActivity : AppCompatActivity(), BeaconConsumer{
+class MainActivity : AppCompatActivity(), BeaconConsumer {
     private lateinit var bottomNavigation : BottomNavigationView
-    val shppingListViewModel: ShoppingListViewModel by lazy {
+    val shoppingListViewModel: ShoppingListViewModel by lazy {
         ViewModelProvider(this)[ShoppingListViewModel::class.java]
     }
     var tableN = ""
     var orderId = -1
+    var userCouponId = -1
     var readable = false
     var isNear = false
 
@@ -69,7 +67,7 @@ class MainActivity : AppCompatActivity(), BeaconConsumer{
     private val BEACON_UUID = "fda50693-a4e2-4fb1-afcf-c6eb07647825"
     private val BEACON_MAJOR = "10004"
     private val BEACON_MINOR = "54480"
-    private val STORE_DISTANCE = 1 // 스토어 거리 1m
+    private val STORE_DISTANCE = 30 //스토어 거리 30m
 
     private val region = Region("altbeacon"
         , Identifier.parse(BEACON_UUID)
@@ -95,15 +93,12 @@ class MainActivity : AppCompatActivity(), BeaconConsumer{
     private var mFusedLocationClient: FusedLocationProviderClient? = null
 
 
-
-
     // Intent 사용 requestForActivity 선언
     private val requestActivity: ActivityResultLauncher<Intent> = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult() // ◀ StartActivityForResult 처리를 담당
     ) {
         // 사용자가 GPS 를 켰는지 검사함
-        if (checkLocationServicesStatus()) {
-        }else{
+        if (checkLocationServicesStatus() == false) {
             Log.d(TAG, "dialog: ")
             showDialogForLocationServiceSetting()
 
@@ -123,8 +118,6 @@ class MainActivity : AppCompatActivity(), BeaconConsumer{
         createNotificationChannel("ssafy_channel", "ssafy")
 
         checkPermissions()
-
-
 
 
         supportFragmentManager.beginTransaction()
@@ -204,7 +197,8 @@ class MainActivity : AppCompatActivity(), BeaconConsumer{
             5 -> {
                 logout()
             }
-            6 -> transaction.replace(R.id.frame_layout_main, MyPageFragment())
+            //coupon
+            6 -> transaction.replace(R.id.frame_layout_main, CouponFragment())
                 .addToBackStack(null)
         }
         transaction.commit()
@@ -274,9 +268,6 @@ class MainActivity : AppCompatActivity(), BeaconConsumer{
             )
 
             startLocationUpdates()
-
-
-
         }
 
 
@@ -387,18 +378,15 @@ class MainActivity : AppCompatActivity(), BeaconConsumer{
 
         beaconManager.addRangeNotifier { beacons, region ->
             for (beacon in beacons) {
-                // Major, Minor로 Beacon 구별, 1미터 이내에 들어오면 다이얼로그 출력
+                // Major, Minor로 Beacon 구별, 30미터 이내에 들어오면 다이얼로그 출력
                 if(isStoreBeacon(beacon)){
-                    if (beacon.distance <= STORE_DISTANCE) {
                         // 주문한건지 확인
+                        isNear = true
                         showPopDialog()
                         beaconManager.stopMonitoringBeaconsInRegion(region)
                         beaconManager.stopRangingBeaconsInRegion(region)
-                    }
 
-                    if (beacon.distance <= 200) {
-                        isNear = true
-                    }
+
                 }
             }
         }
@@ -464,6 +452,7 @@ class MainActivity : AppCompatActivity(), BeaconConsumer{
         val rawMsgs = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES)
 
         if(rawMsgs!=null){
+            nd!!.dismiss()
             val message = arrayOfNulls<NdefMessage>(rawMsgs.size)
             for(i in rawMsgs.indices){
                 message[i]=rawMsgs[i] as NdefMessage
@@ -476,14 +465,14 @@ class MainActivity : AppCompatActivity(), BeaconConsumer{
                 val data = record_data.payload
                 //가져온 데이터를 TextView에 반영
                 tableN = String(data).substring(3)
-                completedOrder()
                 Log.d("tableN", "getNFCData: $tableN")
+                completedOrder()
             }
         }
     }
 
     fun completedOrder() {
-        shppingListViewModel.shoppingList.observe(this, { list ->
+        shoppingListViewModel.shoppingList.observe(this, { list ->
             Log.d(TAG, "completedOrder: $list")
 
             val order = Order().apply {
@@ -499,14 +488,19 @@ class MainActivity : AppCompatActivity(), BeaconConsumer{
         })
     }
 
+    private fun couponStateUpdate() {
+        if (userCouponId > 0)
+            CouponService().updateCouponUsed(userCouponId, CouponStateCallback())
+    }
+
     // GPS 켜져있는지 확인
-    private fun checkLocationServicesStatus(): Boolean {
+    fun checkLocationServicesStatus(): Boolean {
         val locationManager =
             this.getSystemService(Context.LOCATION_SERVICE) as LocationManager
         return (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
                 || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER))
-        return true
     }
+
     private fun showDialogForLocationServiceSetting() {
         val builder: androidx.appcompat.app.AlertDialog.Builder =
             androidx.appcompat.app.AlertDialog.Builder(this)
@@ -524,12 +518,14 @@ class MainActivity : AppCompatActivity(), BeaconConsumer{
         ) { dialog, _ -> dialog.cancel() }
         builder.create().show()
     }
+
     inner class OrderCallback: RetrofitCallback<Int> {
         override fun onSuccess(code: Int, responseData: Int) {
+            couponStateUpdate()
             orderId = responseData
             Toast.makeText(this@MainActivity, "주문이 완료되었습니다.", Toast.LENGTH_SHORT).show()
             readable = false
-            shppingListViewModel.clearCart()
+            shoppingListViewModel.clearCart()
             supportFragmentManager.apply {
                 beginTransaction().remove(ShoppingListFragment()).commit()
                 popBackStack()
@@ -544,6 +540,24 @@ class MainActivity : AppCompatActivity(), BeaconConsumer{
         override fun onFailure(code: Int) {
             Log.d(TAG, "onResponse: Error Code $code")
         }
+    }
+
+    inner class CouponStateCallback : RetrofitCallback<Boolean> {
+        override fun onSuccess(code: Int, responseData: Boolean) {
+            if (responseData) {
+                Log.d(TAG, "onSuccess: 쿠폰 사용 성공")
+                userCouponId = -1
+            }
+        }
+
+        override fun onError(t: Throwable) {
+            Log.d(TAG, t.message ?: "쿠폰정보 업데이트 중 통신오류")
+        }
+
+        override fun onFailure(code: Int) {
+            Log.d(TAG, "onResponse: Error Code $code")
+        }
+
     }
 
     override fun onDestroy() {

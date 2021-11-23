@@ -79,7 +79,9 @@ class OrderFragment : Fragment(){
         initData()
 
         distance = DistanceManager.getDistance(mylat, mylong, DEFAULT_LOCATION.latitude, DEFAULT_LOCATION.longitude)
-        if(mylat==0.1 && mylong==0.1)
+        if(!mainActivity.checkLocationServicesStatus())
+            binding.distanceInfo.setText("매장 위치 확인하기!")
+        else if(mylat==0.1 && mylong==0.1)
             binding.distanceInfo.setText("매장까지의 거리를 파악하고 있습니다.. ")
         else
             binding.distanceInfo.setText("매장과의 거리가 ${distance}m 입니다. ")
@@ -126,16 +128,14 @@ class OrderFragment : Fragment(){
         menuAdapter.filterList(filteredList)
     }
     private fun initData(){
-
         ProductService().getProductList(ProductCallback())
-
     }
 
     inner class ProductCallback: RetrofitCallback<List<Product>> {
         override fun onSuccess( code: Int, productList: List<Product>) {
             productList.let {
                 Log.d(TAG, "onSuccess: ${productList}")
-                prodList=productList
+                prodList= productList
                 menuAdapter = MenuAdapter(productList)
                 menuAdapter.setItemClickListener(object : MenuAdapter.ItemClickListener{
                     override fun onClick(view: View, position: Int, productId:Int) {
@@ -181,7 +181,6 @@ class OrderFragment : Fragment(){
 
             }
         }
-
 
         override fun onProviderDisabled(provider: String) {
         }
