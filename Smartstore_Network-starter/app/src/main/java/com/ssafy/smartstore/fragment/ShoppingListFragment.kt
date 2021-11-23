@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.DialogInterface
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,10 +21,13 @@ import com.ssafy.smartstore.adapter.CouponAdapter
 import com.ssafy.smartstore.adapter.ShoppingListAdapter
 import com.ssafy.smartstore.config.ApplicationClass
 import com.ssafy.smartstore.databinding.FragmentShoppingListBinding
+import com.ssafy.smartstore.dto.Coupon
 import com.ssafy.smartstore.service.CouponService
 import com.ssafy.smartstore.util.CommonUtils
+import com.ssafy.smartstore.util.RetrofitCallback
 
 //장바구니 Fragment
+private const val TAG = "ShoppingListFragment_싸피"
 class ShoppingListFragment : Fragment(){
     private lateinit var shoppingListAdapter : ShoppingListAdapter
     private lateinit var mainActivity: MainActivity
@@ -31,7 +35,7 @@ class ShoppingListFragment : Fragment(){
     private lateinit var btnTakeout : Button
     private lateinit var btnOrder : Button
     private var isShop : Boolean = true
-    private var couponId = -1
+    private var userCouponId = -1
     private lateinit var binding: FragmentShoppingListBinding
 
     override fun onAttach(context: Context) {
@@ -43,7 +47,7 @@ class ShoppingListFragment : Fragment(){
         super.onCreate(savedInstanceState)
         mainActivity.hideBottomNav(true)
         arguments?.let {
-            couponId = it.getInt("orderId")
+            userCouponId = it.getInt("userCouponId")
         }
     }
 
@@ -83,12 +87,8 @@ class ShoppingListFragment : Fragment(){
     }
 
     private fun loadDiscount() {
-        if (couponId > 0) {
-//            val coupon = Coupon() // 서비스에서 받아와야함.
-//            val disCountPrice = getDiscountPrice(shoppingListAdapter.getTotalPrice(), coupon.type)
-//            binding.tvSelectedCoupon.text = "적용된 쿠폰( ${coupon.name} )"
-//            binding.tvDiscountPrice.text = "- ${CommonUtils.makeComma(disCountPrice)}"
-//            binding.tvFinalMoney.text = CommonUtils.makeComma(shoppingListAdapter.getTotalPrice() - disCountPrice)
+        if (userCouponId > 0) {
+            CouponService().getCoupon(userCouponId, GetCouponCallback())
         } else {
             binding.tvSelectedCoupon.text = "적용된 쿠폰( 없음 )"
             binding.tvDiscountPrice.text = "- 0 원"
@@ -146,9 +146,8 @@ class ShoppingListFragment : Fragment(){
                     } else {
                         val couponAdapter = CouponAdapter(it).apply {
                             setItemClickListener(object : CouponAdapter.ItemClickListener {
-                                override fun onClick(view: View, position: Int, id: Int) {
-                                    // 쿠폰 적용
-                                    couponId = id
+                                override fun onClick(view: View, position: Int, userCouponId: Int) {
+                                    this@ShoppingListFragment.userCouponId = userCouponId
                                     loadDiscount()
                                     dialog.create().dismiss()
                                 }
@@ -221,6 +220,28 @@ class ShoppingListFragment : Fragment(){
         builder.setNegativeButton("취소"
         ) { dialog, _ -> dialog.cancel() }
         builder.create().show()
+    }
+
+    inner class GetCouponCallback : RetrofitCallback<Coupon> {
+        override fun onSuccess(code: Int, coupon: Coupon) {
+            Log.d(TAG, "onSuccess: $coupon")
+            val disCountPrice = getDiscountPrice(shoppingListAdapter.getTotalPrice(), coupon.type)
+            binding.tvSelectedCoupon.text = "적용된 쿠폰( ${coupon.name} )"
+            binding.tvDiscountPrice.text = "- ${CommonUtils.makeComma(disCountPrice)}"
+            binding.tvFinalMoney.text = CommonUtils.makeComma(shoppingListAdapter.getTotalPrice() - disCountPrice)
+        }
+
+        override fun onError(t: Throwable) {
+            Log.d(TAG, t.message ?: "쿠폰 정보 불러오는 중 통신오류")
+            binding.tvSelectedCoupon.text = "적용된 쿠폰( 없음 )"
+            binding.tvDiscountPrice.text = "- 0 원"
+            binding.tvFinalMoney.text = CommonUtils.makeComma(shoppingListAdapter.getTotalPrice())
+        }
+
+        override fun onFailure(code: Int) {
+            Log.d(TAG, "onResponse: Error Code $code")
+        }
+
     }
 
     companion object {

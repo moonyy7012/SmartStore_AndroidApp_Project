@@ -55,12 +55,12 @@ class CouponFragment : Fragment() {
         }
 
         couponAdapter.setItemClickListener(object : CouponAdapter.ItemClickListener {
-            override fun onClick(view: View, position: Int, couponId: Int) {
+            override fun onClick(view: View, position: Int, userCouponId: Int) {
                 mainActivity.supportFragmentManager.apply {
                     beginTransaction().remove(this@CouponFragment)
                     popBackStack()
                 }
-                mainActivity.openFragment(1, "couponId", couponId)
+                mainActivity.openFragment(1, "userCouponId", userCouponId)
             }
         })
 

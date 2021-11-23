@@ -55,7 +55,7 @@ class CouponAdapter(var list: List<Coupon>) : RecyclerView.Adapter<CouponAdapter
 
     //클릭 인터페이스 정의 사용하는 곳에서 만들어준다.
     interface ItemClickListener {
-        fun onClick(view: View,  position: Int, couponId: Int)
+        fun onClick(view: View,  position: Int, userCouponId: Int)
     }
     //클릭리스너 선언
     private lateinit var itemClickListener: ItemClickListener
