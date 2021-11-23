@@ -8,16 +8,13 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ssafy.smartstore.activity.MainActivity
 import com.ssafy.smartstore.adapter.MenuAdapter
-import com.ssafy.smartstore.config.ApplicationClass
 import com.ssafy.smartstore.databinding.FragmentOrderBinding
 import com.ssafy.smartstore.dto.Product
-import com.ssafy.smartstore.dto.User
 import com.ssafy.smartstore.service.ProductService
 import com.ssafy.smartstore.util.RetrofitCallback
 
@@ -89,16 +86,14 @@ class OrderFragment : Fragment(){
         menuAdapter.filterList(filteredList)
     }
     private fun initData(){
-
         ProductService().getProductList(ProductCallback())
-
     }
 
     inner class ProductCallback: RetrofitCallback<List<Product>> {
         override fun onSuccess( code: Int, productList: List<Product>) {
             productList.let {
                 Log.d(TAG, "onSuccess: ${productList}")
-                prodList=productList
+                prodList= productList
                 menuAdapter = MenuAdapter(productList)
                 menuAdapter.setItemClickListener(object : MenuAdapter.ItemClickListener{
                     override fun onClick(view: View, position: Int, productId:Int) {
