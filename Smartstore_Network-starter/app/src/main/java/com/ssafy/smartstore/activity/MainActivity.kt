@@ -37,6 +37,7 @@ import com.ssafy.smartstore.config.ShoppingListViewModel
 import com.ssafy.smartstore.dto.Order
 import com.ssafy.smartstore.dto.OrderDetail
 import com.ssafy.smartstore.fragment.*
+import com.ssafy.smartstore.service.CouponService
 import com.ssafy.smartstore.service.OrderService
 import com.ssafy.smartstore.util.RetrofitCallback
 import org.altbeacon.beacon.*
@@ -50,6 +51,7 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
     }
     var tableN = ""
     var orderId = -1
+    var userCouponId = -1
     var readable = false
     var isNear = false
 
@@ -441,8 +443,14 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
         })
     }
 
-    inner class OrderCallback: RetrofitCallback<Int> {
+    private fun couponStateUpdate() {
+        if (userCouponId > 0)
+            CouponService().updateCouponUsed(userCouponId, CouponStateCallback())
+    }
+
+    inner class OrderCallback : RetrofitCallback<Int> {
         override fun onSuccess(code: Int, responseData: Int) {
+            couponStateUpdate()
             orderId = responseData
             Toast.makeText(this@MainActivity, "주문이 완료되었습니다.", Toast.LENGTH_SHORT).show()
             readable = false
@@ -461,6 +469,24 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
         override fun onFailure(code: Int) {
             Log.d(TAG, "onResponse: Error Code $code")
         }
+    }
+
+    inner class CouponStateCallback : RetrofitCallback<Boolean> {
+        override fun onSuccess(code: Int, responseData: Boolean) {
+            if (responseData) {
+                Log.d(TAG, "onSuccess: 쿠폰 사용 성공")
+                userCouponId = -1
+            }
+        }
+
+        override fun onError(t: Throwable) {
+            Log.d(TAG, t.message ?: "쿠폰정보 업데이트 중 통신오류")
+        }
+
+        override fun onFailure(code: Int) {
+            Log.d(TAG, "onResponse: Error Code $code")
+        }
+
     }
 
     override fun onDestroy() {

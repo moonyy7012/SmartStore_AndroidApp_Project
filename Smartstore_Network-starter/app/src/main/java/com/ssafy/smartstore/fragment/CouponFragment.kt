@@ -60,7 +60,8 @@ class CouponFragment : Fragment() {
                     beginTransaction().remove(this@CouponFragment)
                     popBackStack()
                 }
-                mainActivity.openFragment(1, "userCouponId", userCouponId)
+                mainActivity.userCouponId = userCouponId
+                mainActivity.openFragment(1)
             }
         })
 

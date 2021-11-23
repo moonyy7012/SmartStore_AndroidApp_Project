@@ -16,6 +16,6 @@ interface CouponApi {
     @GET("rest/coupon/use/coupon/{id}")
     fun getCoupon(@Path("id") id: Int): Call<Coupon>
 
-    @PUT("rest/coupon/{couponId}")
-    fun updateCouponUseState(@Path("couponId") couponId: Int): Call<Unit>
+    @PUT("rest/coupon/{id}")
+    fun updateCouponUseState(@Path("id") id: Int): Call<Boolean>
 }

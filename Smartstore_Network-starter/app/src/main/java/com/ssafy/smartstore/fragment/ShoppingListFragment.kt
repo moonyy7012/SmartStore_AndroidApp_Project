@@ -35,7 +35,6 @@ class ShoppingListFragment : Fragment(){
     private lateinit var btnTakeout : Button
     private lateinit var btnOrder : Button
     private var isShop : Boolean = true
-    private var userCouponId = -1
     private lateinit var binding: FragmentShoppingListBinding
 
     override fun onAttach(context: Context) {
@@ -46,9 +45,6 @@ class ShoppingListFragment : Fragment(){
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mainActivity.hideBottomNav(true)
-        arguments?.let {
-            userCouponId = it.getInt("userCouponId")
-        }
     }
 
     override fun onCreateView(
@@ -87,8 +83,8 @@ class ShoppingListFragment : Fragment(){
     }
 
     private fun loadDiscount() {
-        if (userCouponId > 0) {
-            CouponService().getCoupon(userCouponId, GetCouponCallback())
+        if (mainActivity.userCouponId > 0) {
+            CouponService().getCoupon(mainActivity.userCouponId, GetCouponCallback())
         } else {
             binding.tvSelectedCoupon.text = "적용된 쿠폰( 없음 )"
             binding.tvDiscountPrice.text = "- 0 원"
@@ -173,7 +169,7 @@ class ShoppingListFragment : Fragment(){
                     val couponAdapter = CouponAdapter(it).apply {
                         setItemClickListener(object : CouponAdapter.ItemClickListener {
                             override fun onClick(view: View, position: Int, userCouponId: Int) {
-                                this@ShoppingListFragment.userCouponId = userCouponId
+                                mainActivity.userCouponId = userCouponId
                                 loadDiscount()
                                 ad.dismiss()
                             }
