@@ -43,6 +43,7 @@ import com.ssafy.smartstore.config.ShoppingListViewModel
 import com.ssafy.smartstore.dto.Order
 import com.ssafy.smartstore.dto.OrderDetail
 import com.ssafy.smartstore.fragment.*
+import com.ssafy.smartstore.fragment.ShoppingListFragment.Companion.nd
 import com.ssafy.smartstore.service.CouponService
 import com.ssafy.smartstore.service.OrderService
 import com.ssafy.smartstore.util.RetrofitCallback
@@ -451,6 +452,7 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
         val rawMsgs = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES)
 
         if(rawMsgs!=null){
+            nd!!.dismiss()
             val message = arrayOfNulls<NdefMessage>(rawMsgs.size)
             for(i in rawMsgs.indices){
                 message[i]=rawMsgs[i] as NdefMessage

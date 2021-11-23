@@ -198,13 +198,15 @@ class ShoppingListFragment : Fragment(){
             }
         }
 
-        AlertDialog.Builder(mainActivity)
+        val nfcDialog = AlertDialog.Builder(mainActivity)
             .setTitle("알림")
             .setMessage("Table NFC를 찍어주세요")
-            .setNegativeButton("확인", listener)
+            .setNegativeButton("취소", listener)
             .setCancelable(false)
-            .show()
 
+
+        nd = nfcDialog.create()
+        nd!!.show()
         mainActivity.readable = true
     }
 
@@ -247,6 +249,7 @@ class ShoppingListFragment : Fragment(){
     }
 
     companion object {
+        var nd:AlertDialog?=null
         @JvmStatic
         fun newInstance(key:String, value:Int) =
             ShoppingListFragment().apply {
