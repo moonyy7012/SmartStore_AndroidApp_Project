@@ -158,6 +158,7 @@ class ShoppingListFragment : Fragment(){
             .setView(view)
             .setPositiveButton("취소", null)
 
+        val ad = dialog.create()
         CouponService().getCouponList(ApplicationClass.sharedPreferencesUtil.getUser().id).observe(
             viewLifecycleOwner,
             {
@@ -170,7 +171,7 @@ class ShoppingListFragment : Fragment(){
                             override fun onClick(view: View, position: Int, userCouponId: Int) {
                                 mainActivity.userCouponId = userCouponId
                                 loadDiscount()
-                                dialog.create().dismiss()
+                                ad.dismiss()
                             }
                         })
                     }
@@ -185,7 +186,7 @@ class ShoppingListFragment : Fragment(){
             }
         )
 
-        dialog.show()
+        ad.show()
     }
 
     private fun showDialogForOrderInShop() {
@@ -227,7 +228,7 @@ class ShoppingListFragment : Fragment(){
         override fun onSuccess(code: Int, coupon: Coupon) {
             Log.d(TAG, "onSuccess: $coupon")
             val disCountPrice = getDiscountPrice(shoppingListAdapter.getTotalPrice(), coupon.type)
-            binding.tvSelectedCoupon.text = "적용된 쿠폰( ${coupon.name} )"
+            binding.tvSelectedCoupon.setText("적용된 쿠폰( ${coupon.name} )")
             binding.tvDiscountPrice.text = "- ${CommonUtils.makeComma(disCountPrice)}"
             binding.tvFinalMoney.text = CommonUtils.makeComma(shoppingListAdapter.getTotalPrice() - disCountPrice)
         }
