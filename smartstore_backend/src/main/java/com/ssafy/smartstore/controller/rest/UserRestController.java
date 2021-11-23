@@ -1,14 +1,13 @@
 package com.ssafy.smartstore.controller.rest;
 
-import com.ssafy.smartstore.model.dto.Comment;
 import com.ssafy.smartstore.model.dto.Order;
 import com.ssafy.smartstore.model.dto.User;
-import com.ssafy.smartstore.model.service.CommentService;
 import com.ssafy.smartstore.model.service.OrderService;
 import com.ssafy.smartstore.model.service.StampService;
 import com.ssafy.smartstore.model.service.UserService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
@@ -24,7 +23,7 @@ import java.util.*;
 public class UserRestController {
 
     @Autowired
-    UserService uService;
+    UserService userService;
 
     @Autowired
     StampService sService;
@@ -33,22 +32,22 @@ public class UserRestController {
     OrderService oService;
 
     @PostMapping
-    @ApiOperation(value = "사용자 정보를 추가한다.", response = Boolean.class)
+    @ApiOperation(value = "사용자 정보를 추가합니다.", response = Boolean.class)
     public Boolean insert(@RequestBody User user) {
-        uService.join(user);
+        userService.join(user);
         return true;
     }
 
-    @GetMapping("/isUsed")
+    @GetMapping("/isUsed/{id}")
     @ApiOperation(value = "request parameter로 전달된 id가 이미 사용중인지 반환한다.", response = Boolean.class)
-    public Boolean isUsedId(String id) {
-        return uService.isUsedId(id);
+    public Boolean isUsedId(@PathVariable String id) {
+        return userService.isUsedId(id);
     }
 
     @PostMapping("/login")
     @ApiOperation(value = "로그인 처리 후 성공적으로 로그인 되었다면 loginId라는 쿠키를 내려보낸다.", response = User.class)
     public User login(@RequestBody User user, HttpServletResponse response) throws UnsupportedEncodingException {
-        User selected = uService.login(user.getId(), user.getPass());
+        User selected = userService.login(user.getId(), user.getPass());
         if (selected != null) {
             Cookie cookie = new Cookie("loginId", URLEncoder.encode(selected.getId(), "utf-8"));
             cookie.setMaxAge(1000 * 1000);
@@ -60,9 +59,9 @@ public class UserRestController {
     }
 
     @PostMapping("/userinfo")
-    @ApiOperation(value = "사용자 정보를 반환한다.", response = User.class)
+    @ApiOperation(value = "사용자 정보를 반환합니다.", response = User.class)
     public User userInfo(String id) {
-        User selected = uService.select(id);
+        User selected = userService.select(id);
 
         return selected;
 
@@ -86,7 +85,7 @@ public class UserRestController {
     @PostMapping("/info")
     @ApiOperation(value = "사용자의 정보와 함께 사용자의 주문 내역, 사용자 등급 정보를 반환한다.", response = Map.class)
     public Map<String, Object> getInfo(String id) {
-        User selected = uService.select(id);
+        User selected = userService.select(id);
         if (selected == null) {
             return null;
         } else {
@@ -98,6 +97,13 @@ public class UserRestController {
             info.put("grade", getGrade(selected.getStamps()));
             return info;
         }
+    }
+
+    @DeleteMapping("/leave/{id}")
+    @ApiOperation(value="사용자 정보를 삭제합니다.")
+    @Transactional
+    public int leave(@PathVariable String id) {
+        return userService.leave(id);
     }
 
     public Map<String, Object> getGrade(Integer stamp) {
