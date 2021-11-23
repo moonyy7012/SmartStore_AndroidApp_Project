@@ -26,7 +26,7 @@ public interface UserService {
      * id에 해당하는 사용자 정보를 삭제한다.
      * @param id
      */
-    public void leave(String id);
+    public int leave(String id);
 
     /**
      * 해당 아이디가 이미 사용 중인지를 반환한다.
