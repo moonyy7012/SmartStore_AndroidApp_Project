@@ -99,7 +99,7 @@ class HomeFragment : Fragment() {
                                 item.totalPrice,
                                 item.productType
                             )
-                            mainActivity.shppingListViewModel.addItem(shoppingCart)
+                            mainActivity.shoppingListViewModel.addItem(shoppingCart)
                         }
                         mainActivity.openFragment(1)
                     })

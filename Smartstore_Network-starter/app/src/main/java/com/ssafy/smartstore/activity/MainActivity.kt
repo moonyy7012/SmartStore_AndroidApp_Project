@@ -38,7 +38,6 @@ import com.ssafy.smartstore.dto.Order
 import com.ssafy.smartstore.dto.OrderDetail
 import com.ssafy.smartstore.fragment.*
 import com.ssafy.smartstore.service.OrderService
-import com.ssafy.smartstore.util.CommonUtils
 import com.ssafy.smartstore.util.RetrofitCallback
 import org.altbeacon.beacon.*
 import java.util.*
@@ -46,7 +45,7 @@ import java.util.*
 private const val TAG = "MainActivity_싸피"
 class MainActivity : AppCompatActivity(), BeaconConsumer {
     private lateinit var bottomNavigation : BottomNavigationView
-    val shppingListViewModel: ShoppingListViewModel by lazy {
+    val shoppingListViewModel: ShoppingListViewModel by lazy {
         ViewModelProvider(this)[ShoppingListViewModel::class.java]
     }
     var tableN = ""
@@ -426,7 +425,7 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
     }
 
     fun completedOrder() {
-        shppingListViewModel.shoppingList.observe(this, { list ->
+        shoppingListViewModel.shoppingList.observe(this, { list ->
             Log.d(TAG, "completedOrder: $list")
 
             val order = Order().apply {
@@ -447,7 +446,7 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
             orderId = responseData
             Toast.makeText(this@MainActivity, "주문이 완료되었습니다.", Toast.LENGTH_SHORT).show()
             readable = false
-            shppingListViewModel.clearCart()
+            shoppingListViewModel.clearCart()
             supportFragmentManager.apply {
                 beginTransaction().remove(ShoppingListFragment()).commit()
                 popBackStack()

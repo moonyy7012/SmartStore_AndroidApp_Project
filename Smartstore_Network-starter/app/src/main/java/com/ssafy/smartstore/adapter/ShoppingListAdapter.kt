@@ -15,7 +15,7 @@ import com.ssafy.smartstore.util.CommonUtils
 
 
 class ShoppingListAdapter(val activity: MainActivity) :RecyclerView.Adapter<ShoppingListAdapter.ShoppingListHolder>(){
-    var list = activity.shppingListViewModel.shoppingList.value!!
+    var list = activity.shoppingListViewModel.shoppingList.value!!
 
     inner class ShoppingListHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
         val name: TextView = itemView.findViewById(R.id.textShoppingMenuName)
