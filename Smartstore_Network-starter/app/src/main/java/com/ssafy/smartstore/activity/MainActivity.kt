@@ -44,18 +44,20 @@ import com.ssafy.smartstore.dto.Order
 import com.ssafy.smartstore.dto.OrderDetail
 import com.ssafy.smartstore.fragment.*
 import com.ssafy.smartstore.service.OrderService
+import com.ssafy.smartstore.util.CommonUtils
 import com.ssafy.smartstore.util.RetrofitCallback
 import org.altbeacon.beacon.*
 import java.util.*
 
 private const val TAG = "MainActivity_싸피"
-class MainActivity : AppCompatActivity(), BeaconConsumer{
+class MainActivity : AppCompatActivity(), BeaconConsumer {
     private lateinit var bottomNavigation : BottomNavigationView
     val shoppingListViewModel: ShoppingListViewModel by lazy {
         ViewModelProvider(this)[ShoppingListViewModel::class.java]
     }
     var tableN = ""
     var orderId = -1
+    var userCouponId = -1
     var readable = false
     var isNear = false
 
@@ -90,8 +92,6 @@ class MainActivity : AppCompatActivity(), BeaconConsumer{
     private var mFusedLocationClient: FusedLocationProviderClient? = null
 
 
-
-
     // Intent 사용 requestForActivity 선언
     private val requestActivity: ActivityResultLauncher<Intent> = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult() // ◀ StartActivityForResult 처리를 담당
@@ -117,8 +117,6 @@ class MainActivity : AppCompatActivity(), BeaconConsumer{
         createNotificationChannel("ssafy_channel", "ssafy")
 
         checkPermissions()
-
-
 
 
         supportFragmentManager.beginTransaction()
@@ -198,7 +196,8 @@ class MainActivity : AppCompatActivity(), BeaconConsumer{
             5 -> {
                 logout()
             }
-            6 -> transaction.replace(R.id.frame_layout_main, MyPageFragment())
+            //coupon
+            6 -> transaction.replace(R.id.frame_layout_main, CouponFragment())
                 .addToBackStack(null)
         }
         transaction.commit()
@@ -490,6 +489,11 @@ class MainActivity : AppCompatActivity(), BeaconConsumer{
         })
     }
 
+    private fun couponStateUpdate() {
+        if (userCouponId > 0)
+            CouponService().updateCouponUsed(userCouponId, CouponStateCallback())
+    }
+
     // GPS 켜져있는지 확인
     fun checkLocationServicesStatus(): Boolean {
         val locationManager =
@@ -515,8 +519,10 @@ class MainActivity : AppCompatActivity(), BeaconConsumer{
         ) { dialog, _ -> dialog.cancel() }
         builder.create().show()
     }
+
     inner class OrderCallback: RetrofitCallback<Int> {
         override fun onSuccess(code: Int, responseData: Int) {
+            couponStateUpdate()
             orderId = responseData
             Toast.makeText(this@MainActivity, "주문이 완료되었습니다.", Toast.LENGTH_SHORT).show()
             readable = false
@@ -535,6 +541,24 @@ class MainActivity : AppCompatActivity(), BeaconConsumer{
         override fun onFailure(code: Int) {
             Log.d(TAG, "onResponse: Error Code $code")
         }
+    }
+
+    inner class CouponStateCallback : RetrofitCallback<Boolean> {
+        override fun onSuccess(code: Int, responseData: Boolean) {
+            if (responseData) {
+                Log.d(TAG, "onSuccess: 쿠폰 사용 성공")
+                userCouponId = -1
+            }
+        }
+
+        override fun onError(t: Throwable) {
+            Log.d(TAG, t.message ?: "쿠폰정보 업데이트 중 통신오류")
+        }
+
+        override fun onFailure(code: Int) {
+            Log.d(TAG, "onResponse: Error Code $code")
+        }
+
     }
 
     override fun onDestroy() {

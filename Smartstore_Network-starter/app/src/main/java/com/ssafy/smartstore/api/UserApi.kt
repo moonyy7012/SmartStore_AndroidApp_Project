@@ -14,8 +14,8 @@ interface UserApi {
     fun getInfo(@Query("id") id: String): Call<HashMap<String, Any>>
 
     // request parameter로 전달된 id가 이미 사용중인지 반환한다.
-    @GET("rest/user/isUsed")
-    fun isUsedId(@Query("id") id: String): Call<Boolean>
+    @GET("rest/user/isUsed/{id}")
+    fun isUsedId(@Path("id") id: String): Call<Boolean>
 
     // 로그인 처리 후 성공적으로 로그인 되었다면 loginId라는 쿠키를 내려준다.
     @POST("rest/user/login")

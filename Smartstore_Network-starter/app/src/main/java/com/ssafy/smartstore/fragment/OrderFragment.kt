@@ -128,16 +128,14 @@ class OrderFragment : Fragment(){
         menuAdapter.filterList(filteredList)
     }
     private fun initData(){
-
         ProductService().getProductList(ProductCallback())
-
     }
 
     inner class ProductCallback: RetrofitCallback<List<Product>> {
         override fun onSuccess( code: Int, productList: List<Product>) {
             productList.let {
                 Log.d(TAG, "onSuccess: ${productList}")
-                prodList=productList
+                prodList= productList
                 menuAdapter = MenuAdapter(productList)
                 menuAdapter.setItemClickListener(object : MenuAdapter.ItemClickListener{
                     override fun onClick(view: View, position: Int, productId:Int) {

@@ -1,18 +1,8 @@
 package com.ssafy.smartstore.service
 
-import android.content.Context
 import android.os.Build
-import android.util.Log
-import android.view.Menu
-import android.widget.Toast
 import androidx.annotation.RequiresApi
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import com.ssafy.smartstore.config.ApplicationClass
-import com.ssafy.smartstore.dto.Comment
-import com.ssafy.smartstore.dto.Product
 import com.ssafy.smartstore.dto.User
-import com.ssafy.smartstore.response.MenuDetailWithCommentResponse
 import com.ssafy.smartstore.util.RetrofitCallback
 import com.ssafy.smartstore.util.RetrofitUtil
 import retrofit2.Call
