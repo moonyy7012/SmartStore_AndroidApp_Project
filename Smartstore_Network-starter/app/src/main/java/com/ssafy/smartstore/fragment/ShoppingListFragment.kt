@@ -125,6 +125,7 @@ class ShoppingListFragment : Fragment(){
             .setTitle("알림")
             .setMessage("Table NFC를 찍어주세요")
             .setNegativeButton("확인", listener)
+            .setCancelable(false)
             .show()
 
         mainActivity.readable = true

@@ -467,8 +467,8 @@ class MainActivity : AppCompatActivity(), BeaconConsumer{
                 val data = record_data.payload
                 //가져온 데이터를 TextView에 반영
                 tableN = String(data).substring(3)
-                completedOrder()
                 Log.d("tableN", "getNFCData: $tableN")
+                completedOrder()
             }
         }
     }
