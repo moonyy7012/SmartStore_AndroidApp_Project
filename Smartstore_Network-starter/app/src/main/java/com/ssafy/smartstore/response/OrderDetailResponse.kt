@@ -7,7 +7,7 @@ data class OrderDetailResponse(
     @SerializedName("o_id") val orderId: Int,
     @SerializedName("order_table") val orderTable: String,
     @SerializedName("order_time") val orderDate: Date,
-    @SerializedName("completed") val orderCompleted: Char='N',
+    @SerializedName("completed") val orderCompleted: Char = 'N',
     @SerializedName("quantity") val quantity: Int,
     @SerializedName("p_id") val productId: Int,
     @SerializedName("name") val productName: String,

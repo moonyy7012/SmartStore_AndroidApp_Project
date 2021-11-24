@@ -41,7 +41,7 @@ class ApplicationClass : Application() {
         )
 
         // 주문 준비 완료 확인 시간 1분
-        const val ORDER_COMPLETED_TIME = 60*1000
+//        const val ORDER_COMPLETED_TIME = 60*1000
 
     }
 
