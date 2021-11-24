@@ -33,4 +33,7 @@ public interface OrderDao {
      * @return
      */
     List<Map<String, Object>> getLastMonthOrder(String id);
+
+    // 고객의 주문을 완료 처리한다
+    int setComplete(Integer orderId);
 }

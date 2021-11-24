@@ -43,7 +43,7 @@ public class ProductRestController {
     }
 
     @PutMapping("/update")
-    @ApiOperation(value = "상품 정보를 업데이트합니다.")
+    @ApiOperation(value = "상품 정보를 업데이트합니다. (관리자용)")
     public int update(@RequestBody Product product) {
         return productService.update(product);
     }

@@ -23,6 +23,13 @@
         WHERE o_id = #{id}
     </update>
 
+    <update id="setComplete" parameterType="int">
+        UPDATE t_order
+        SET
+            completed = "Y"
+        WHERE o_id = #{id}
+    </update>
+
     <delete id="delete" parameterType="int">
         DELETE FROM t_order
         WHERE o_id
