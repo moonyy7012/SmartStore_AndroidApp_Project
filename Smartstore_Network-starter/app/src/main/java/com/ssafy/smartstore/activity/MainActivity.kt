@@ -111,13 +111,15 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
         setContentView(R.layout.activity_main)
         // 가장 첫 화면은 홈 화면의 Fragment로 지정
 
+        checkPermissions()
+
         setNdef()
 
         setBeacon()
 
         createNotificationChannel("ssafy_channel", "ssafy")
 
-        checkPermissions()
+        setLocationRequest()
 
 
         supportFragmentManager.beginTransaction()
@@ -236,8 +238,6 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
     }
 
     private fun setBeacon(){
-        checkPermissions()
-
         beaconManager = BeaconManager.getInstanceForApplication(this)
         beaconManager.beaconParsers.add(BeaconParser().setBeaconLayout("m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24"))
         bluetoothManager = getSystemService(BLUETOOTH_SERVICE) as BluetoothManager
@@ -258,6 +258,7 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
         }
     }
 
+    // 권한 확인
     private fun checkPermissions(){
         val hasFineLocationPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
         if(hasFineLocationPermission != PackageManager.PERMISSION_GRANTED){
@@ -266,10 +267,14 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
                 ApplicationClass.requiredPermissions,
                 PERMISSIONS_CODE
             )
-
-            startLocationUpdates()
         }
+    }
 
+    // 위치 요청 설정
+    private fun setLocationRequest() {
+        if (!checkLocationServicesStatus()) {
+            showDialogForLocationServiceSetting()
+        }
 
         locationRequest = LocationRequest.create().apply {
             priority = LocationRequest.PRIORITY_HIGH_ACCURACY
@@ -283,13 +288,6 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
     }
 
-    // 권한 확인 및 위치 정보 업데이트
-    private fun startLocationUpdates() {
-
-        if (!checkLocationServicesStatus()) {
-            showDialogForLocationServiceSetting()
-        }
-    }
     // Beacon Scan 시작
     private fun startScan() {
         // 블루투스 Enable 확인
