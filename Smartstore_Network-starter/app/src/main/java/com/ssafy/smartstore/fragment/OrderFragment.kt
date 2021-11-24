@@ -15,6 +15,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -79,7 +80,7 @@ class OrderFragment : Fragment(){
         initData()
 
         distance = DistanceManager.getDistance(mylat, mylong, DEFAULT_LOCATION.latitude, DEFAULT_LOCATION.longitude)
-        if(!mainActivity.checkLocationServicesStatus())
+        if(checkPermission() == false)
             binding.distanceInfo.setText("매장 위치 확인하기!")
         else if(mylat == 0.1 && mylong == 0.1)
             binding.distanceInfo.setText("매장까지의 거리를 파악하고 있습니다.. ")
@@ -109,6 +110,11 @@ class OrderFragment : Fragment(){
 
         })
 
+    }
+
+    private fun checkPermission(): Boolean {
+        return (ContextCompat.checkSelfPermission(requireContext(),
+            ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
     }
 
     private fun searchFilter(searchText:String?){

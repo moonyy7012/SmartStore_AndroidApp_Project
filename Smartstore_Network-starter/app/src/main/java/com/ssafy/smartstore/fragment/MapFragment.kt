@@ -73,7 +73,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     private val mapPermissionResult = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { result ->
-        if (!mainActivity.checkLocationServicesStatus()) {
+        if (mainActivity.checkLocationServicesStatus()) {
             needRequest = true
             startLocationUpdates()
         }
