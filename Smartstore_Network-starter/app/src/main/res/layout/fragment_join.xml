@@ -49,14 +49,15 @@
     </LinearLayout>
 
     <EditText
-        android:background="@drawable/textview_regular"
         android:id="@+id/editTextJoinPW"
+        style="@style/Text.Regular"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="50dp"
         android:layout_marginBottom="20dp"
-        style="@style/Text.Regular"
-        android:hint="비밀번호를 입력하세요." />
+        android:background="@drawable/textview_regular"
+        android:hint="비밀번호를 입력하세요."
+        android:inputType="textPassword" />
 
     <EditText
         android:background="@drawable/textview_regular"
