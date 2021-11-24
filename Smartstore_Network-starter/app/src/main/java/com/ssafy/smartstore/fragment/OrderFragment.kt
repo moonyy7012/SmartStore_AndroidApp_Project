@@ -43,7 +43,7 @@ class OrderFragment : Fragment(){
     }
     companion object{
         val DEFAULT_LOCATION = LatLng(37.62064003133028, 126.9161908472352)
-        var mylat=0.1
+        var mylat = 0.1
         var mylong = 0.1
         var distance = 0
     }
@@ -81,7 +81,7 @@ class OrderFragment : Fragment(){
         distance = DistanceManager.getDistance(mylat, mylong, DEFAULT_LOCATION.latitude, DEFAULT_LOCATION.longitude)
         if(!mainActivity.checkLocationServicesStatus())
             binding.distanceInfo.setText("매장 위치 확인하기!")
-        else if(mylat==0.1 && mylong==0.1)
+        else if(mylat == 0.1 && mylong == 0.1)
             binding.distanceInfo.setText("매장까지의 거리를 파악하고 있습니다.. ")
         else
             binding.distanceInfo.setText("매장과의 거리가 ${distance}m 입니다. ")
@@ -109,10 +109,7 @@ class OrderFragment : Fragment(){
 
         })
 
-
     }
-
-
 
     private fun searchFilter(searchText:String?){
         filteredList= mutableListOf()
@@ -177,8 +174,13 @@ class OrderFragment : Fragment(){
                     binding.distanceInfo.setText("매장과의 거리가 ${distance}m 입니다. ")
                     Log.d("$TAG GPS : ", "${location.latitude}/${location.longitude}")
                 }
-
-
+                LocationManager.NETWORK_PROVIDER -> {
+                    mylat = location.latitude
+                    mylong = location.longitude
+                    distance = DistanceManager.getDistance(location.latitude, location.longitude, DEFAULT_LOCATION.latitude, DEFAULT_LOCATION.longitude)
+                    binding.distanceInfo.setText("매장과의 거리가 ${distance}m 입니다. ")
+                    Log.d("$TAG NET : ", "${location.latitude}/${location.longitude}")
+                }
             }
         }
 
@@ -189,7 +191,7 @@ class OrderFragment : Fragment(){
         override fun onProviderEnabled(provider: String) {
             if (isPermitted()) {
                 locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0f, this)
-
+                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0f, this)
             }
         }
 
@@ -208,6 +210,7 @@ class OrderFragment : Fragment(){
         super.onResume()
         if(isPermitted()){
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0f, listener)
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0f, listener)
         }
     }
 
@@ -217,6 +220,4 @@ class OrderFragment : Fragment(){
             locationManager.removeUpdates(listener)
         }
     }
-
-
 }
