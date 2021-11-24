@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="150dp"
         android:scaleType="fitCenter"
-        android:src="@drawable/coffee1" />
+        android:src="@drawable/loading_img" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -30,7 +30,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="0dp"
                 android:layout_weight="1"
-                android:text="아메리카노"
+                android:text="loading..."
                 android:textSize="40dp" />
 
             <ImageView
@@ -55,7 +55,7 @@
                 android:id="@+id/txtMenuPrice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="4,000원"
+                android:text="loading..."
                 android:textSize="30dp"
                 style="@style/Text.light"/>
         </LinearLayout>
