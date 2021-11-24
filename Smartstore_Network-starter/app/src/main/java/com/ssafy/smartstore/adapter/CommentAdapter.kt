@@ -26,7 +26,8 @@ class CommentAdapter(var list:List<MenuDetailWithCommentResponse> ) :RecyclerVie
     }
 
 
-    inner class CommentHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
+    inner class CommentHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val tvNickname: TextView = itemView.findViewById(R.id.tv_nickname)
         val tvComment: TextView = itemView.findViewById(R.id.tv_comment_content)
         val etComment: EditText = itemView.findViewById(R.id.et_comment_content)
         val ivModifyAccept: ImageView = itemView.findViewById(R.id.iv_modify_accept_comment)
@@ -35,6 +36,7 @@ class CommentAdapter(var list:List<MenuDetailWithCommentResponse> ) :RecyclerVie
         val ivDelete: ImageView = itemView.findViewById(R.id.iv_delete_comment)
 
         fun bindInfo(data :MenuDetailWithCommentResponse) {
+            tvNickname.text = data.commentUserName
             tvComment.text = data.commentContent
             etComment.visibility = View.GONE
             ivModifyAccept.visibility = View.GONE

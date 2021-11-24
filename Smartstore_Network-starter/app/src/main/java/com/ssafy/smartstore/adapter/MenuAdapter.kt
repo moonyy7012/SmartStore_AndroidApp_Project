@@ -10,6 +10,7 @@ import com.bumptech.glide.Glide
 import com.ssafy.smartstore.R
 import com.ssafy.smartstore.config.ApplicationClass
 import com.ssafy.smartstore.dto.Product
+import com.ssafy.smartstore.util.CommonUtils
 
 private const val TAG = "MenuAdapter_싸피"
 class MenuAdapter(var productList:List<Product>) :RecyclerView.Adapter<MenuAdapter.MenuHolder>(){
@@ -17,12 +18,20 @@ class MenuAdapter(var productList:List<Product>) :RecyclerView.Adapter<MenuAdapt
     inner class MenuHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
         val menuName = itemView.findViewById<TextView>(R.id.textMenuNames)
         val menuImage = itemView.findViewById<ImageView>(R.id.menuImage)
+        val menuPrice = itemView.findViewById<TextView>(R.id.textPrice)
+        val mFavorite = itemView.findViewById<ImageView>(R.id.list_iv_favorite)
+        val mGoOrder = itemView.findViewById<TextView>(R.id.btn_go_order)
 
         fun bindInfo(product : Product){
+            mFavorite.visibility = View.GONE
+            mGoOrder.visibility = View.GONE
+
             menuName.text = product.name
             Glide.with(itemView)
                 .load("${ApplicationClass.MENU_IMGS_URL}${product.img}")
                 .into(menuImage)
+
+            menuPrice.text = CommonUtils.makeComma(product.price)
 
             itemView.setOnClickListener{
                 itemClickListener.onClick(it, layoutPosition, productList[layoutPosition].id)

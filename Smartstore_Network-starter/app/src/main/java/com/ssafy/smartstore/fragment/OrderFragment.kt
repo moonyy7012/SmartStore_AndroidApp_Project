@@ -15,12 +15,15 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.maps.model.LatLng
 import com.ssafy.smartstore.activity.MainActivity
 import com.ssafy.smartstore.adapter.MenuAdapter
+import com.ssafy.smartstore.config.ApplicationClass.Companion.requiredPermissions
 import com.ssafy.smartstore.databinding.FragmentOrderBinding
 import com.ssafy.smartstore.dto.Product
 import com.ssafy.smartstore.service.ProductService
@@ -29,10 +32,9 @@ import java.lang.Math.*
 import kotlin.math.pow
 
 
-
 // 하단 주문 탭
 private const val TAG = "OrderFragment_싸피"
-class OrderFragment : Fragment(){
+class OrderFragment : Fragment() {
     private lateinit var menuAdapter: MenuAdapter
     private lateinit var mainActivity: MainActivity
     private lateinit var prodList:List<Product>
@@ -41,10 +43,10 @@ class OrderFragment : Fragment(){
     private val locationManager by lazy {
         context?.getSystemService(LOCATION_SERVICE) as LocationManager
     }
-    companion object{
+    companion object {
         val DEFAULT_LOCATION = LatLng(37.62064003133028, 126.9161908472352)
-        var mylat=0.1
-        var mylong = 0.1
+        var myLat = 0.1
+        var myLong = 0.1
         var distance = 0
     }
     object DistanceManager {
@@ -78,10 +80,10 @@ class OrderFragment : Fragment(){
 
         initData()
 
-        distance = DistanceManager.getDistance(mylat, mylong, DEFAULT_LOCATION.latitude, DEFAULT_LOCATION.longitude)
-        if(!mainActivity.checkLocationServicesStatus())
+        distance = DistanceManager.getDistance(myLat, myLong, DEFAULT_LOCATION.latitude, DEFAULT_LOCATION.longitude)
+        if(checkPermission() == false)
             binding.distanceInfo.setText("매장 위치 확인하기!")
-        else if(mylat==0.1 && mylong==0.1)
+        else if(myLat == 0.1 && myLong == 0.1)
             binding.distanceInfo.setText("매장까지의 거리를 파악하고 있습니다.. ")
         else
             binding.distanceInfo.setText("매장과의 거리가 ${distance}m 입니다. ")
@@ -109,10 +111,12 @@ class OrderFragment : Fragment(){
 
         })
 
-
     }
 
-
+    private fun checkPermission(): Boolean {
+        return (ContextCompat.checkSelfPermission(requireContext(),
+            requiredPermissions[0]) == PackageManager.PERMISSION_GRANTED)
+    }
 
     private fun searchFilter(searchText:String?){
         filteredList= mutableListOf()
@@ -145,7 +149,7 @@ class OrderFragment : Fragment(){
             }
 
             binding.recyclerViewMenu.apply {
-                layoutManager = GridLayoutManager(context,3)
+                layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
                 adapter = menuAdapter
                 //원래의 목록위치로 돌아오게함
                 adapter!!.stateRestorationPolicy =
@@ -171,14 +175,19 @@ class OrderFragment : Fragment(){
         override fun onLocationChanged(location: Location) {//location 변경될 때마다 이게 불림
             when(location.provider) {
                 LocationManager.GPS_PROVIDER -> {
-                    mylat = location.latitude
-                    mylong = location.longitude
+                    myLat = location.latitude
+                    myLong = location.longitude
                     distance = DistanceManager.getDistance(location.latitude, location.longitude, DEFAULT_LOCATION.latitude, DEFAULT_LOCATION.longitude)
                     binding.distanceInfo.setText("매장과의 거리가 ${distance}m 입니다. ")
                     Log.d("$TAG GPS : ", "${location.latitude}/${location.longitude}")
                 }
-
-
+                LocationManager.NETWORK_PROVIDER -> {
+                    myLat = location.latitude
+                    myLong = location.longitude
+                    distance = DistanceManager.getDistance(location.latitude, location.longitude, DEFAULT_LOCATION.latitude, DEFAULT_LOCATION.longitude)
+                    binding.distanceInfo.setText("매장과의 거리가 ${distance}m 입니다. ")
+                    Log.d("$TAG NET : ", "${location.latitude}/${location.longitude}")
+                }
             }
         }
 
@@ -189,7 +198,7 @@ class OrderFragment : Fragment(){
         override fun onProviderEnabled(provider: String) {
             if (isPermitted()) {
                 locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0f, this)
-
+                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0f, this)
             }
         }
 
@@ -208,6 +217,7 @@ class OrderFragment : Fragment(){
         super.onResume()
         if(isPermitted()){
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0f, listener)
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0f, listener)
         }
     }
 
@@ -217,6 +227,4 @@ class OrderFragment : Fragment(){
             locationManager.removeUpdates(listener)
         }
     }
-
-
 }

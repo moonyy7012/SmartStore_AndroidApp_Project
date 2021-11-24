@@ -67,13 +67,18 @@ class JoinFragment : Fragment(){
             Log.d(TAG, "btnJoin: ")
             val joinId = binding.editTextJoinID.text.toString()
             val joinPw = binding.editTextJoinPW.text.toString()
+            val confirmPw = binding.editTextConfirmPW.text.toString()
             val joinName = binding.editTextJoinName.text.toString()
 
-            if (isNotVoid(joinId, joinPw, joinName)) {
+            if (isNotVoid(joinId, joinPw, confirmPw, joinName)) {
                 if (checkedId == false) {
                     Toast.makeText(context, "아이디 중복을 검사하세요", Toast.LENGTH_SHORT).show()
                 } else {
-                    join(joinId, joinPw, joinName)
+                    if(joinPw!=confirmPw){
+                        Toast.makeText(context, "비밀번호가 일치하지 않습니다.", Toast.LENGTH_SHORT).show()
+                    }else{
+                        join(joinId, joinPw, joinName)
+                    }
                 }
             } else {
                 Toast.makeText(context, "모든 정보를 기입하세요", Toast.LENGTH_SHORT).show()
@@ -111,7 +116,7 @@ class JoinFragment : Fragment(){
         else        view.setBackgroundResource(R.drawable.textview_regular_red)
     }
 
-    private fun isNotVoid(joinId: String, joinPw: String, joinName: String): Boolean {
+    private fun isNotVoid(joinId: String, joinPw: String, confirmPw:String, joinName: String): Boolean {
         var result = true
 
         Log.d(TAG, "isNotVoid: $joinId $joinPw $joinName")
@@ -129,6 +134,13 @@ class JoinFragment : Fragment(){
         }
         else {
             changeView(true, binding.editTextJoinPW)
+        }
+        if (confirmPw == "") {
+            changeView(false, binding.editTextConfirmPW)
+            result = false
+        }
+        else {
+            changeView(true, binding.editTextConfirmPW)
         }
         if (joinName == "") {
             changeView(false, binding.editTextJoinName)
