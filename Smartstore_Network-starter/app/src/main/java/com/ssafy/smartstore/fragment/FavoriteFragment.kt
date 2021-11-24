@@ -5,12 +5,15 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.ssafy.smartstore.activity.MainActivity
 import com.ssafy.smartstore.adapter.FavoriteAdapter
 import com.ssafy.smartstore.database.FavoriteDto
 import com.ssafy.smartstore.databinding.FragmentFavoriteBinding
+import com.ssafy.smartstore.dto.ShoppingCart
 import com.ssafy.smartstore.repository.FavoriteRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -43,36 +46,60 @@ class FavoriteFragment : Fragment(){
         favoriteRepository = FavoriteRepository.get()
 
         initAdapter()
-
+        initEvent()
     }
 
     private fun initAdapter(){
         favoriteAdapter = FavoriteAdapter(listOf())
         CoroutineScope(Dispatchers.Main).launch{
-            favoriteAdapter.favoriteList = getData()
             refreshAdapter()
         }
 
 
         binding.recyclerViewMenu.apply{
             adapter = favoriteAdapter
-            layoutManager = GridLayoutManager(context, 3)
+            layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
         }
+    }
+
+    private fun initEvent() {
         favoriteAdapter.setItemClickListener(object : FavoriteAdapter.ItemClickListener{
             override fun onClick(view: View, position: Int, productId:Int) {
                 mainActivity.openFragment(3, "productId", productId)
             }
+
+            override fun onSelect(view: View, position: Int, productId: Int) {
+                CoroutineScope(Dispatchers.Main).launch {
+                    favoriteRepository.deleteFavorite(productId)
+                    refreshAdapter()
+                }
+                Toast.makeText(requireContext(), "즐겨찾기에서 삭제되었습니다.", Toast.LENGTH_SHORT).show()
+            }
+
+            override fun goOrder(view: View, position: Int, fProduct: FavoriteDto) {
+                val shoppingCart = ShoppingCart(
+                    fProduct.productId,
+                    fProduct.img,
+                    fProduct.name,
+                    1,
+                    fProduct.price,
+                    fProduct.price,
+                    fProduct.type
+                )
+
+                mainActivity.shoppingListViewModel.addItem(shoppingCart)
+                Toast.makeText(context, "상품이 장바구니에 담겼습니다.", Toast.LENGTH_SHORT).show()
+            }
         })
     }
-    suspend private fun refreshAdapter(){
+
+    private suspend fun refreshAdapter(){
         favoriteAdapter.favoriteList = getData()
         favoriteAdapter.notifyDataSetChanged()
     }
 
     //전체 데이터 조회해서 리턴
-    suspend private fun getData(): MutableList<FavoriteDto> {
+    private suspend fun getData(): MutableList<FavoriteDto> {
         return favoriteRepository.getFavorites()
     }
-
-
 }
