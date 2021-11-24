@@ -58,4 +58,9 @@ public class OrderServiceImpl implements OrderService{
     public List<Map<String, Object>> getLastMonthOrder(String id) {
         return orderDao.getLastMonthOrder(id);
     }
+
+    @Override
+    public int setComplete(Integer orderId) {
+        return orderDao.setComplete(orderId);
+    }
 }

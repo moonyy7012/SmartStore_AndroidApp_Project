@@ -59,18 +59,21 @@ public class CouponRestController {
     }
 
     @PostMapping("/insert")
+    @ApiOperation(value="새 쿠폰을 생성합니다. (관리자용)")
     @Transactional
     public int insert(@RequestBody Coupon coupon) {
         return couponService.insert(coupon);
     }
 
     @PostMapping("/select")
+    @ApiOperation(value = "모든 쿠폰 정보를 반환합니다.")
     @Transactional
     public List<Coupon> select() {
         return couponService.select();
     }
 
     @PutMapping("/update")
+    @ApiOperation(value = "특정 쿠폰의 정보(이름, 할인율 등)를 변경합니다. (관리자용)")
     @Transactional
     public int update(@RequestBody Coupon coupon) {
         return couponService.update(coupon);

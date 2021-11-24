@@ -70,4 +70,11 @@ public class OrderRestController {
     public List<Map<String, Object>> getLastMonthOrder(String id) {
         return orderService.getLastMonthOrder(id);
     }
+
+    @PutMapping("/complete")
+    @ApiOperation(value = "사용자의 주문 내역을 완료 처리합니다. (관리자용)")
+    @Transactional
+    public int setComplete(Integer orderId) {
+        return orderService.setComplete(orderId);
+    }
 }
