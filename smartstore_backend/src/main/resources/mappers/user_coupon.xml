@@ -61,7 +61,8 @@
         WHERE
             <![CDATA[
 		        validate < str_to_date(now(), '%Y-%m-%d')
- 	        ]]>;
+ 	        ]]>
+        AND is_used = "not used";
     </select>
 
 </mapper>
