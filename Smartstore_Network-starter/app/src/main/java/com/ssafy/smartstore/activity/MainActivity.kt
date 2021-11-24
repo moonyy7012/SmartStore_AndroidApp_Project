@@ -380,13 +380,12 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
             for (beacon in beacons) {
                 // Major, Minor로 Beacon 구별, 30미터 이내에 들어오면 다이얼로그 출력
                 if(isStoreBeacon(beacon)){
-                        // 주문한건지 확인
-                        isNear = true
+                    isNear = true
+                    if (beacon.distance <= STORE_DISTANCE) {
                         showPopDialog()
                         beaconManager.stopMonitoringBeaconsInRegion(region)
                         beaconManager.stopRangingBeaconsInRegion(region)
-
-
+                    }
                 }
             }
         }
@@ -400,7 +399,7 @@ class MainActivity : AppCompatActivity(), BeaconConsumer {
 
     // 찾고자 하는 Beacon이 맞는지, 정해둔 거리 내부인지 확인
     private fun isStoreBeacon(beacon: Beacon): Boolean {
-        return beacon.id2.toString() == BEACON_MAJOR && beacon.id3.toString() == BEACON_MINOR && beacon.distance <= STORE_DISTANCE
+        return beacon.id2.toString() == BEACON_MAJOR && beacon.id3.toString() == BEACON_MINOR
 
     }
 
