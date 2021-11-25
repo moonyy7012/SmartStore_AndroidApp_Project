@@ -80,7 +80,7 @@ class MenuDetailFragment : Fragment(){
         setFavorite()
     }
     private fun setFavorite() {
-        favoriteRepository= FavoriteRepository.get()
+        favoriteRepository = FavoriteRepository.get()
         CoroutineScope(Dispatchers.IO).launch {
             Log.d(TAG, "setFavorite: ${favoriteRepository.getFavorite(productId)}$")
             binding.ivFavorite.isSelected = favoriteRepository.getFavorite(productId) != null
