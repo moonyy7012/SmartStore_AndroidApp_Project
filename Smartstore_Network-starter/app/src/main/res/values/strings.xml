@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Smartstore</string>
+    <string name="app_name">SSAFY BEAN</string>
     <string name="name">벼락부자핫도그</string>
     <string name="level">%1$s %2$d 단계</string>
     <string name="next_level">%1$d/10</string>
